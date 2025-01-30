@@ -1,0 +1,14 @@
+# NOK - work in progress 
+appId: com.mindera.alfie.debug
+---
+# Test Case 10: Search with Category Filter
+- launchApp
+- waitForAnimationToEnd
+- tapOn: "Search Alfie"
+- inputText: "Dress"
+- tapOn: "Dresses Women"
+- tapOn: "Filter"
+- tapOn: "Size"
+- tapOn: "M"
+- tapOn: "Apply"
+- assertVisible: "M"  # Verify filter is applied 

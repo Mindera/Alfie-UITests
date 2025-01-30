@@ -1,0 +1,15 @@
+appId: com.mindera.alfie.debug
+---
+- launchApp
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: Home
+    timeout: 5000  # 5 seconds timeout 
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible: Hi, Alfie
+    timeout: 5000  # 5 seconds timeout 
+- tapOn: "Sign out"
+- extendedWaitUntil:
+    visible: "Sign In"
+    timeout: 5000  # 5 seconds timeout 

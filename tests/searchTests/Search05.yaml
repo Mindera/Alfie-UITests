@@ -1,0 +1,11 @@
+appId: com.mindera.alfie.debug
+---
+# Test Case 5: Special Characters Search
+- launchApp
+- waitForAnimationToEnd
+- tapOn: "Search Alfie"
+- extendedWaitUntil:
+    visible: What are you looking for?
+    timeout: 5000
+- inputText: "@#$%"
+- assertVisible: "Search Suggestions"  # Verify handling of special characters 

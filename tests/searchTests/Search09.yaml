@@ -1,0 +1,13 @@
+appId: com.mindera.alfie.debug
+---
+# Test Case 9: Search History (Your Recent Searches)
+- launchApp
+- waitForAnimationToEnd
+- tapOn: "Search Alfie"
+- inputText: "shirts"
+- pressKey: Enter
+- tapOn: "back"
+- tapOn: 
+    id: "back-btn"
+- tapOn: "Search Alfie"
+- assertVisible: "shirts"  # Verify that last search appears in Searches history 
