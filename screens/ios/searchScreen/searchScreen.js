@@ -11,4 +11,6 @@ output.searchScreen = {
     searchSuggestionsTitle: 'search-suggestions-title',
     suggestionsItem: 'suggestions-item',
     moreProductsCta: 'more-products-cta',
+    brandsListLink: 'brands-list-link',
+    emptyScreen: 'empty-screen',
 }

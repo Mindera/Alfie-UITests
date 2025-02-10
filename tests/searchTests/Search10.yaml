@@ -1,14 +1,25 @@
 # NOK - work in progress 
-appId: com.mindera.alfie.debug
+appId: com.mindera.alfie.debug #iOS
+#appId: au.com.alfie.ecomm.debug #Android
 ---
-# Test Case 10: Search with Category Filter
+# Test Case 10: Clear search history
 - launchApp
 - waitForAnimationToEnd
-- tapOn: "Search Alfie"
-- inputText: "Dress"
-- tapOn: "Dresses Women"
-- tapOn: "Filter"
-- tapOn: "Size"
-- tapOn: "M"
-- tapOn: "Apply"
-- assertVisible: "M"  # Verify filter is applied 
+- runScript: 
+    file: ../../screens/ios/homeScreen/homeScreen.js
+- tapOn:
+    id: ${output.homeScreen.searchInput}
+- inputText: "shirts"
+- pressKey: Enter
+- runScript: 
+    file: ../../screens/ios/searchScreen/searchScreen.js
+- tapOn: "back"
+- tapOn: 
+    id: ${output.searchScreen.backButton}
+- tapOn:
+    id: ${output.searchScreen.textToSearch}
+- assertVisible: "shirts"
+- tapOn:
+    id: ${output.searchScreen.clearRecentSearches}
+- assertVisible:
+    id: ${output.searchScreen.emptyScreen}

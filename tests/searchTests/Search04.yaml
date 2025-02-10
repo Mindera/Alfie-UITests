@@ -1,4 +1,5 @@
-appId: com.mindera.alfie.debug
+appId: com.mindera.alfie.debug #iOS
+#appId: au.com.alfie.ecomm.debug #Android
 ---
 # Test Case 4: Empty Search
 - launchApp
@@ -8,4 +9,9 @@ appId: com.mindera.alfie.debug
     visible: What are you looking for?
     timeout: 5000
 - inputText: ""
-- assertVisible: "Your Recent Searches"  # Verify default state is shown 
+- pressKey: Enter
+- assertVisible: "Your Recent Searches"
+- runScript:
+    file: ../../screens/ios/plpScreen/plpScreen.js
+- assertNotVisible:
+    id: ${output.plpScreen.productCard}

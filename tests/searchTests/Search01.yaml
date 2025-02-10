@@ -1,4 +1,5 @@
-appId: com.mindera.alfie.debug
+appId: com.mindera.alfie.debug #iOS
+#appId: au.com.alfie.ecomm.debug #Android
 ---
 # Test Case 1: Basic Search
 - launchApp
