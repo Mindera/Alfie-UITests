@@ -2,23 +2,15 @@ appId: com.mindera.alfie.debug #iOS
 #appId: au.com.alfie.ecomm.debug #Android
 ---
 # Test Case 08: Search with emojis
-- launchApp
+- runFlow: ../../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
-- runScript: 
-    file: ../../screens/ios/homeScreen/homeScreen.js
 - tapOn:
-    id: ${output.homeScreen.searchInput}
+    id: ${homeScreen.searchInput}
 - inputText: "😀 🎉 🌟"
-- runScript: 
-    file: ../../screens/ios/searchScreen/searchScreen.js
-
 # The following line should run only if we are NOT using Mock Server #
 #- assertVisible: "We were unable to find any results for your search ‘😀 🎉 🌟’" # Verify handling of emojis 
 
 # The following line should run only if we ARE using Mock Server #
 - assertVisible: "Search Suggestions"  # Verify handling of emojis 
-
-- runScript:
-    file: ../../screens/ios/plpScreen/plpScreen.js
 - assertNotVisible:
-    id: ${output.plpScreen.productCard} 
+    id: ${plpScreen.productCard} 

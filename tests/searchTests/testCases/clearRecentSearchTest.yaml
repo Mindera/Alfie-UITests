@@ -1,0 +1,21 @@
+# NOK - work in progress 
+appId: com.mindera.alfie.debug #iOS
+#appId: au.com.alfie.ecomm.debug #Android
+---
+# Test Case 10: Clear search history
+- runFlow: ../../../generics/setup/launchApp.yaml
+- waitForAnimationToEnd
+- tapOn:
+    id: ${homeScreen.searchInput}
+- inputText: "shirts"
+- pressKey: Enter
+- tapOn: "back"
+- tapOn: 
+    id: ${searchScreen.backButton}
+- tapOn:
+    id: ${searchScreen.textToSearch}
+- assertVisible: "shirts"
+- tapOn:
+    id: ${searchScreen.clearRecentSearches}
+- assertVisible:
+    id: ${searchScreen.emptyScreen}

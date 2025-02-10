@@ -2,19 +2,15 @@ appId: com.mindera.alfie.debug #iOS
 #appId: au.com.alfie.ecomm.debug #Android
 ---
 # Test Case 9: Search History (Your Recent Searches)
-- launchApp
+- runFlow: ../../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
-- runScript: 
-    file: ../../screens/ios/homeScreen/homeScreen.js
 - tapOn:
-    id: ${output.homeScreen.searchInput}
+    id: ${homeScreen.searchInput}
 - inputText: "shirts"
 - pressKey: Enter
-- runScript: 
-    file: ../../screens/ios/searchScreen/searchScreen.js
 - tapOn: "back"
 - tapOn: 
-    id: ${output.searchScreen.backButton}
+    id: ${searchScreen.backButton}
 - tapOn:
-    id: ${output.searchScreen.textToSearch}
+    id: ${searchScreen.textToSearch}
 - assertVisible: "shirts"  # Verify that last search appears in Search history 

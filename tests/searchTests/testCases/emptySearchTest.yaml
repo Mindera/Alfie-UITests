@@ -2,7 +2,7 @@ appId: com.mindera.alfie.debug #iOS
 #appId: au.com.alfie.ecomm.debug #Android
 ---
 # Test Case 4: Empty Search
-- launchApp
+- runFlow: ../../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn: "Search Alfie"
 - extendedWaitUntil:
@@ -11,7 +11,5 @@ appId: com.mindera.alfie.debug #iOS
 - inputText: ""
 - pressKey: Enter
 - assertVisible: "Your Recent Searches"
-- runScript:
-    file: ../../screens/ios/plpScreen/plpScreen.js
 - assertNotVisible:
-    id: ${output.plpScreen.productCard}
+    id: ${plpScreen.productCard}

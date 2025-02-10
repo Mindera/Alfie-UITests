@@ -1,0 +1,18 @@
+appId: com.mindera.alfie.debug #iOS
+#appId: au.com.alfie.ecomm.debug #Android
+---
+# Test Case 11: Search results sort
+- runFlow: ../../../generics/setup/launchApp.yaml
+- waitForAnimationToEnd
+- tapOn:
+    id: ${homeScreen.searchInput}
+- inputText: "shirt"
+- tapOn: "shirts women"
+- assertVisible:
+    id: ${plpScreen.productCard}
+- tapOn: 
+    id: ${plpScreen.filterButton}
+- tapOn: "A-Z"
+- tapOn: "Show results"
+- assertVisible:
+    id: ${plpScreen.productCard} # Verify sort is applied 

@@ -1,5 +1,5 @@
 // plpScreen.js
-output.plpScreen = {
+plpScreen = {
     backButton: 'back-btn',
     titleHeader: 'title-header',
     filterButton: 'filter-btn',

@@ -2,23 +2,15 @@ appId: com.mindera.alfie.debug #iOS
 #appId: au.com.alfie.ecomm.debug #Android
 ---
 # Test Case 07: Numeric search
-- launchApp
+- runFlow: ../../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
-- runScript: 
-    file: ../../screens/ios/homeScreen/homeScreen.js
 - tapOn:
-    id: ${output.homeScreen.searchInput}
+    id: ${homeScreen.searchInput}
 - inputText: "1234567890"
-- runScript: 
-    file: ../../screens/ios/searchScreen/searchScreen.js
-
 # The following line should run only if we are NOT using Mock Server #
 #- assertVisible: "We were unable to find any results for your search ‘1234567890’" # Verify handling of numeric characters 
 
 # The following line should run only if we ARE using Mock Server #
 - assertVisible: "Search Suggestions"  # Verify handling of numeric characters 
-
-- runScript:
-    file: ../../screens/ios/plpScreen/plpScreen.js
 - assertNotVisible:
-    id: ${output.plpScreen.productCard} 
+    id: ${plpScreen.productCard} 

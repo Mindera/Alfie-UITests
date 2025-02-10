@@ -1,0 +1,14 @@
+appId: com.mindera.alfie.debug #iOS
+#appId: au.com.alfie.ecomm.debug #Android
+---
+# Test Case 03: Search return several products
+- runFlow: ../../../generics/setup/launchApp.yaml
+- waitForAnimationToEnd
+- tapOn:
+    id: ${homeScreen.searchInput}
+- inputText: "shirt"
+- pressKey: Enter
+- assertVisible:
+    id: ${plpScreen.productCard}
+- assertVisible:
+    id: ${plpScreen.resultsLabel} 

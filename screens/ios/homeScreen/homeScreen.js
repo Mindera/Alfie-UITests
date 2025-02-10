@@ -1,4 +1,4 @@
 // homeScreen.js
-output.homeScreen = {
+homeScreen = {
     searchInput: 'search-input',
 }

@@ -1,5 +1,5 @@
 // searchScreen.js
-output.searchScreen = {
+searchScreen = {
     textToSearch: 'search-input',
     backButton: 'back-btn',
     magnifier: 'magnifyingglass',	

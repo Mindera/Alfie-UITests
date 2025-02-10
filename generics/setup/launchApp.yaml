@@ -1,0 +1,9 @@
+appId: com.mindera.alfie.debug
+---
+- runFlow:
+    when:
+        platform: iOS
+    commands:
+        - runScript:
+            file: ../../screens/iOS/iosElements.yaml
+- launchApp
