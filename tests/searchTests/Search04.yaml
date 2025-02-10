@@ -1,0 +1,17 @@
+appId: com.mindera.alfie.debug #iOS
+#appId: au.com.alfie.ecomm.debug #Android
+---
+# Test Case 4: Empty Search
+- launchApp
+- waitForAnimationToEnd
+- tapOn: "Search Alfie"
+- extendedWaitUntil:
+    visible: What are you looking for?
+    timeout: 5000
+- inputText: ""
+- pressKey: Enter
+- assertVisible: "Your Recent Searches"
+- runScript:
+    file: ../../screens/ios/plpScreen/plpScreen.js
+- assertNotVisible:
+    id: ${output.plpScreen.productCard}

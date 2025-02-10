@@ -1,0 +1,19 @@
+appId: com.mindera.alfie.debug #iOS
+#appId: au.com.alfie.ecomm.debug #Android
+---
+# Test Case 5: Special Characters Search
+- launchApp
+- waitForAnimationToEnd
+- runScript: 
+    file: ../../screens/ios/homeScreen/homeScreen.js
+- tapOn:
+    id: ${output.homeScreen.searchInput}
+- extendedWaitUntil:
+    visible: What are you looking for?
+    timeout: 5000
+- inputText: "@#$%"
+# The following line should run only if we are NOT using Mock Server #
+#- assertVisible: "We were unable to find any results for your search ‘@#$%’" # Verify handling of special characters 
+
+# The following line should run only if we ARE using Mock Server #
+- assertVisible: "Search Suggestions"  # Verify handling of special characters 

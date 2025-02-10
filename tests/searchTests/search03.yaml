@@ -1,0 +1,20 @@
+appId: com.mindera.alfie.debug #iOS
+#appId: au.com.alfie.ecomm.debug #Android
+---
+# Test Case 03: Search return several products
+- launchApp
+- waitForAnimationToEnd
+- runScript: 
+    file: ../../screens/ios/homeScreen/homeScreen.js
+- tapOn:
+    id: ${output.homeScreen.searchInput}
+- inputText: "shirt"
+- pressKey: Enter
+- runScript: 
+    file: ../../screens/ios/searchScreen/searchScreen.js
+- runScript:
+    file: ../../screens/ios/plpScreen/plpScreen.js
+- assertVisible:
+    id: ${output.plpScreen.productCard}
+- assertVisible:
+    id: ${output.plpScreen.resultsLabel} 

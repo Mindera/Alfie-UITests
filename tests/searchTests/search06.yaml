@@ -1,0 +1,25 @@
+appId: com.mindera.alfie.debug #iOS
+#appId: au.com.alfie.ecomm.debug #Android
+---
+# Test Case 06: Very long text search
+- launchApp
+- waitForAnimationToEnd
+- runScript: 
+    file: ../../screens/ios/homeScreen/homeScreen.js
+- tapOn:
+    id: ${output.homeScreen.searchInput}
+- inputText: "This is a very long text. This is a very long text. This is a very long text. This is a very long text. This is a very long text. This is a very long text. This is a very long text. This is a very long text. This is a very long text. This is a very long text."
+- runScript: 
+    file: ../../screens/ios/searchScreen/searchScreen.js
+
+# The following line should run only if we are NOT using Mock Server #
+#- assertVisible:
+#    id: ${output.searchScreen.brandsListLink} # Verify handling of very long text
+
+# The following line should run only if we ARE using Mock Server #
+- assertVisible: "Search Suggestions"  # Verify handling of very long text
+
+- runScript: 
+    file: ../../screens/ios/plpScreen/plpScreen.js
+- assertNotVisible:
+    id: ${output.plpScreen.productCard}

@@ -1,0 +1,8 @@
+#appId: com.mindera.alfie.debug #iOS
+appId: au.com.alfie.ecomm.debug #Android
+---
+# Test Case to Test
+- launchApp
+- waitForAnimationToEnd
+- assertVisible:
+    id: title-header
