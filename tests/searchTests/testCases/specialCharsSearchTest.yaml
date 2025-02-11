@@ -5,7 +5,7 @@ appId: com.mindera.alfie.debug #iOS
 - runFlow: ../../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
-    id: ${homeScreen.searchInput}
+    id: ${output.homeScreen.searchInput}
 - extendedWaitUntil:
     visible: What are you looking for?
     timeout: 5000
@@ -15,3 +15,5 @@ appId: com.mindera.alfie.debug #iOS
 
 # The following line should run only if we ARE using Mock Server #
 - assertVisible: "Search Suggestions"  # Verify handling of special characters 
+- assertNotVisible:
+    id: ${output.plpScreen.productCard} 

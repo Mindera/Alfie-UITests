@@ -1,3 +1,13 @@
 appId: com.mindera.alfie.debug
 ---
+- runFlow: testCases/emptySearchTest.yaml
 - runFlow: testCases/basicSearchTest.yaml
+- runFlow: testCases/clearRecentSearchTest.yaml
+- runFlow: testCases/emojisSearchTest.yaml  
+- runFlow: testCases/emptyResultsTest.yaml
+- runFlow: testCases/longSearchQueryTest.yaml
+- runFlow: testCases/numericSearchTest.yaml
+- runFlow: testCases/recentSearchTest.yaml
+- runFlow: testCases/severalResultsTest.yaml
+- runFlow: testCases/sortResultsTest.yaml
+- runFlow: testCases/specialCharsSearchTest.yaml

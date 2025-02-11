@@ -1,5 +1,0 @@
-appId: com.mindera.alfie.debug
----
-- runScript: homeScreen.js
-- runScript: plpScreen.js
-- runScript: searchScreen.js

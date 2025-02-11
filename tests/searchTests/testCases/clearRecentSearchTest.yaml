@@ -6,16 +6,16 @@ appId: com.mindera.alfie.debug #iOS
 - runFlow: ../../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
-    id: ${homeScreen.searchInput}
+    id: ${output.homeScreen.searchInput}
 - inputText: "shirts"
 - pressKey: Enter
 - tapOn: "back"
 - tapOn: 
-    id: ${searchScreen.backButton}
+    id: ${output.searchScreen.backButton}
 - tapOn:
-    id: ${searchScreen.textToSearch}
+    id: ${output.searchScreen.textToSearch}
 - assertVisible: "shirts"
 - tapOn:
-    id: ${searchScreen.clearRecentSearches}
+    id: ${output.searchScreen.clearRecentSearches}
 - assertVisible:
-    id: ${searchScreen.emptyScreen}
+    id: ${output.searchScreen.emptyScreen}

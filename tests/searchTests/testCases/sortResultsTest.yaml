@@ -5,14 +5,14 @@ appId: com.mindera.alfie.debug #iOS
 - runFlow: ../../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
-    id: ${homeScreen.searchInput}
+    id: ${output.homeScreen.searchInput}
 - inputText: "shirt"
 - tapOn: "shirts women"
 - assertVisible:
-    id: ${plpScreen.productCard}
+    id: ${output.plpScreen.productCard}
 - tapOn: 
-    id: ${plpScreen.filterButton}
+    id: ${output.plpScreen.filterButton}
 - tapOn: "A-Z"
 - tapOn: "Show results"
 - assertVisible:
-    id: ${plpScreen.productCard} # Verify sort is applied 
+    id: ${output.plpScreen.productCard} # Verify sort is applied 

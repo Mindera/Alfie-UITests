@@ -5,10 +5,10 @@ appId: com.mindera.alfie.debug #iOS
 - runFlow: ../../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
-    id: ${homeScreen.searchInput}
+    id: ${output.homeScreen.searchInput}
 - inputText: "shirt"
 - pressKey: Enter
 - assertVisible:
-    id: ${plpScreen.productCard}
+    id: ${output.plpScreen.productCard}
 - assertVisible:
-    id: ${plpScreen.resultsLabel} 
+    id: ${output.plpScreen.resultsLabel} 

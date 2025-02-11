@@ -5,7 +5,7 @@ appId: com.mindera.alfie.debug #iOS
 - runFlow: ../../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
-    id: ${homeScreen.searchInput}
+    id: ${output.homeScreen.searchInput}
 - inputText: "zxcvbnm"
 
 # The following line should run only if we are NOT using Mock Server #
@@ -15,4 +15,4 @@ appId: com.mindera.alfie.debug #iOS
 - assertVisible: "Search Suggestions"
 
 - assertNotVisible:
-    id: ${plpScreen.productCard}
+    id: ${output.plpScreen.productCard}
