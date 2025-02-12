@@ -1,9 +1,14 @@
-appId: com.mindera.alfie.debug #iOS
-#appId: au.com.alfie.ecomm.debug #Android
+#appId: com.mindera.alfie.debug #iOS
+appId: au.com.alfie.ecomm.debug #Android
 ---
+- runFlow:
+    when:
+        platform: "Android"
+    commands:
+        - runFlow: ../../screens/Android/androidElements.yaml
 - runFlow:
     when:
         platform: "iOS"
     commands:
-        - runFlow: ../../screens/iOS/searchScreen/iosElements.yaml
+        - runFlow: ../../screens/iOS/iOSElements.yaml
 - launchApp

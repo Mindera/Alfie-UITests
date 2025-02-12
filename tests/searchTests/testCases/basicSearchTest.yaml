@@ -7,7 +7,7 @@ appId: com.mindera.alfie.debug #iOS
 - extendedWaitUntil:
     visible: Home
     timeout: 5000  # 5 seconds timeout 
-- tapOn: "Search Alfie"
+#- tapOn: "Search Alfie"
 - extendedWaitUntil:
     visible: What are you looking for?
     timeout: 5000  # 5 seconds timeout 
