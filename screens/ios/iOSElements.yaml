@@ -1,4 +1,4 @@
-appId: com.mindera.alfie.debug
+appId: ${APP_ID}
 ---
 - runScript:
     file: ./homeScreen/homeScreen.js

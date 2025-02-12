@@ -1,5 +1,4 @@
-appId: com.mindera.alfie.debug #iOS
-#appId: au.com.alfie.ecomm.debug #Android
+appId: ${APP_ID}
 ---
 # Test Case 08: Search with emojis
 - runFlow: ../../../generics/setup/launchApp.yaml

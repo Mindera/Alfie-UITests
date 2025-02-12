@@ -1,5 +1,4 @@
-appId: com.mindera.alfie.debug #iOS
-#appId: au.com.alfie.ecomm.debug #Android
+appId: ${APP_ID}
 ---
 # Test Case 06: Very long text search
 - runFlow: ../../../generics/setup/launchApp.yaml

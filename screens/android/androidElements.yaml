@@ -1,4 +1,4 @@
-appId: au.com.alfie.ecomm.debug
+appId: ${APP_ID}
 ---
 - runScript:
     file: ./homeScreen/homeScreen.js
