@@ -3,13 +3,49 @@
 # Check if required arguments were provided
 if [ $# -lt 2 ]; then
     echo "How to Run: ./run-tests.sh <platform> <test_suite>"
-    echo "Example: ./run-tests.sh ios tests/searchTests/testCases/basicSearchTest.yaml"
-    echo "         ./run-tests.sh android all    # runs all test cases"
+    echo "Example: ./run-tests.sh ios searchTests"
+    echo "Available test suites:"
+    echo "  - searchTests    : Search functionality tests"
+    echo "  - loginTests     : Login flow tests"
     exit 1
 fi
 
 platform=$1
 test_suite=$2
+
+# Dictionary of test suites and their paths
+declare -A TEST_SUITES=(
+    ["searchTests"]="tests/searchTests/testCases"
+    ["loginTests"]="tests/loginTests/testCases"
+)
+
+# Function to validate and get test suite path
+get_test_suite_path() {
+    local suite=$1
+    local suite_path=${TEST_SUITES[$suite]}
+    
+    if [ -z "$suite_path" ]; then
+        echo "❌ Error: Invalid test suite '$suite'"
+        echo "Available test suites:"
+        for key in "${!TEST_SUITES[@]}"; do
+            echo "  - $key"
+        done
+        exit 1
+    fi
+    
+    if [ ! -d "$suite_path" ]; then
+        echo "❌ Error: Test suite directory not found at $suite_path"
+        exit 1
+    fi
+    
+    echo "✅ Running test suite: $suite"
+    echo "📂 Test path: $suite_path"
+    return 0
+}
+
+# Validate test suite and get path
+get_test_suite_path "$test_suite"
+suite_path=${TEST_SUITES[$test_suite]}
 
 # Function to check iOS device
 check_ios_simulator() {
@@ -119,14 +155,8 @@ else
     exit 1
 fi
 
-# Check if test file exists
-if [ ! -f "$test_suite" ]; then
-    echo "❌ Error: The test file '$test_suite' does not exist"
-    exit 1
-fi
-
 # Run tests
 echo "🚀 Running tests for $platform..."
 echo "📝 Test suite: $test_suite"
 echo "🆔 App ID: $APP_ID"
-maestro test --env APP_ID="$APP_ID" "$test_suite" 
+maestro test --env APP_ID="$APP_ID" --format junit reports/ "$suite_path"
