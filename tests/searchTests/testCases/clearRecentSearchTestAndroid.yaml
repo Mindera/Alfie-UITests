@@ -1,3 +1,4 @@
+#OK#
 appId: ${APP_ID}
 ---
 # Test Case 10: Clear search history
@@ -7,14 +8,10 @@ appId: ${APP_ID}
     id: ${output.homeScreen.searchInput}
 - inputText: "shirts"
 - pressKey: Enter
+- back
 - tapOn: 
-    id: ${output.plpScreen.backButton}
-- tapOn: 
-    id: ${output.searchScreen.backButton}
-- tapOn:
-    id: ${output.searchScreen.textToSearch}
+    id: ${output.homeScreen.searchInput}
 - assertVisible: "shirts"
-- tapOn:
-    id: ${output.searchScreen.clearRecentSearches}
+- tapOn: ${output.searchScreen.clearRecentSearches}
 - assertVisible:
     id: ${output.searchScreen.emptyScreen}

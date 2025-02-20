@@ -1,8 +1,8 @@
 // plpScreen.js
 output.plpScreen = {
-    backButton: 'back-btn',
+ //   backButton: 'back-btn',
     titleHeader: 'title-header',
-    filterButton: 'filter-btn',
+    filterButton: 'filters',
     resultsLabel: 'results-lbl',
     listTypeGridButton: 'listTypeGridButton',
     listTypeListButton: 'listTypeListButton',

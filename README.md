@@ -20,4 +20,4 @@ How to run tests by script:
 chmod +x scripts/run-tests.sh
 
 2. Running the script:
-./scripts/run-tests.sh {search yaml file path}
+./scripts/run-tests.sh {platform} {suite yaml file path}

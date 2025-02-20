@@ -97,14 +97,14 @@ elif [ "$platform" = "android" ]; then
     fi
     
     # Install app (with reinstall if needed)
-    echo "📱 Installing Android app..."
-    adb install -r "$APK_PATH"
-    if [ $? -eq 0 ]; then
-        echo "✅ Android app installed successfully"
-    else
-        echo "❌ Error installing Android app"
-        exit 1
-    fi
+ #   echo "📱 Installing Android app..."
+ #   adb install -r "$APK_PATH"
+ #   if [ $? -eq 0 ]; then
+ #       echo "✅ Android app installed successfully"
+ #   else
+ #       echo "❌ Error installing Android app"
+ #       exit 1
+ #   fi
 
 else
     echo "❌ Invalid platform. Use 'ios' or 'android'"

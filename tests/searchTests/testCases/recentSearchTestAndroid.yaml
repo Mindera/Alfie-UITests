@@ -1,3 +1,4 @@
+#OK#
 appId: ${APP_ID}
 ---
 # Test Case 9: Search History (Your Recent Searches)
@@ -7,10 +8,7 @@ appId: ${APP_ID}
     id: ${output.homeScreen.searchInput}
 - inputText: "shirts"
 - pressKey: Enter
-- tapOn: 
-    id: ${output.plpScreen.backButton}
-- tapOn: 
-    id: ${output.searchScreen.backButton}
+- back
 - tapOn:
-    id: ${output.searchScreen.textToSearch}
+    id: ${output.homeScreen.searchInput}
 - assertVisible: "shirts"  # Verify that last search appears in Search history 
