@@ -1,13 +1,17 @@
 appId: ${APP_ID}
 ---
-- runFlow: testCases/emptySearchTest.yaml
-- runFlow: testCases/basicSearchTest.yaml
-- runFlow: testCases/clearRecentSearchTest.yaml
-- runFlow: testCases/emojisSearchTest.yaml  
-- runFlow: testCases/emptyResultsTest.yaml
-- runFlow: testCases/longSearchQueryTest.yaml
-- runFlow: testCases/numericSearchTest.yaml
-- runFlow: testCases/recentSearchTest.yaml
-- runFlow: testCases/severalResultsTest.yaml
-- runFlow: testCases/sortResultsTest.yaml
-- runFlow: testCases/specialCharsSearchTest.yaml
+executionOrder:
+    continueOnFailure: true
+    flowsOrder:
+        - testCases/emptySearchTest.yaml
+        - testCases/basicSearchTest.yaml
+        - testCases/clearRecentSearchTest.yaml
+        - testCases/emojisSearchTest.yaml  
+        - testCases/emptyResultsTest.yaml
+        - testCases/longSearchQueryTest.yaml
+        - testCases/numericSearchTest.yaml
+        - testCases/recentSearchTest.yaml
+        - testCases/severalResultsTest.yaml
+        - testCases/sortResultsTest.yaml
+        - testCases/specialCharsSearchTest.yaml
+        

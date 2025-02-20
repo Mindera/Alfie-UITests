@@ -67,20 +67,24 @@ if [ "$platform" = "ios" ]; then
     # Check simulator
     check_ios_simulator
     
-    # Check if app exists
+    # Check if app exists in artifacts
     if [ ! -d "$APP_PATH" ]; then
         echo "❌ Error: iOS app not found at $APP_PATH"
         exit 1
     fi
     
-    # Install app
-    echo "📱 Installing iOS app..."
-    xcrun simctl install booted "$APP_PATH"
-    if [ $? -eq 0 ]; then
-        echo "✅ iOS app installed successfully"
+    # Check if app is already installed
+    if ! xcrun simctl list apps | grep -q "$APP_ID"; then
+        echo "📱 App not installed. Installing iOS app..."
+        xcrun simctl install booted "$APP_PATH"
+        if [ $? -eq 0 ]; then
+            echo "✅ iOS app installed successfully"
+        else
+            echo "❌ Error installing iOS app"
+            exit 1
+        fi
     else
-        echo "❌ Error installing iOS app"
-        exit 1
+        echo "✅ iOS app already installed"
     fi
 
 elif [ "$platform" = "android" ]; then
@@ -96,15 +100,19 @@ elif [ "$platform" = "android" ]; then
         exit 1
     fi
     
-    # Install app (with reinstall if needed)
- #   echo "📱 Installing Android app..."
- #   adb install -r "$APK_PATH"
- #   if [ $? -eq 0 ]; then
- #       echo "✅ Android app installed successfully"
- #   else
- #       echo "❌ Error installing Android app"
- #       exit 1
- #   fi
+    # Check if app is already installed
+    if ! adb shell pm list packages | grep -q "$APP_ID"; then
+        echo "📱 App not installed. Installing Android app..."
+        adb install "$APK_PATH"
+        if [ $? -eq 0 ]; then
+            echo "✅ Android app installed successfully"
+        else
+            echo "❌ Error installing Android app"
+            exit 1
+        fi
+    else
+        echo "✅ Android app already installed"
+    fi
 
 else
     echo "❌ Invalid platform. Use 'ios' or 'android'"
