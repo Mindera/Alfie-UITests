@@ -9,11 +9,15 @@ appId: ${APP_ID}
 - pressKey: Enter
 - assertVisible:
     id: ${output.plpScreen.productCard}
-- assertVisible:
+- runFlow:
     when:
-        platform: "Android"
-    id: ${output.plpScreen.titleHeader}
-- assertVisible:
+      platform: "iOS"
+    commands:
+      - assertVisible:
+            id: ${output.plpScreen.resultsLabel}
+- runFlow:
     when:
-        platform: "iOS"
-    id: ${output.plpScreen.resultsLabel} 
+      platform: "Android"
+    commands:
+      - assertVisible:
+            id: ${output.plpScreen.titleHeader}
