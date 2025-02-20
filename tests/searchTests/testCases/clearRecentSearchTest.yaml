@@ -7,12 +7,7 @@ appId: ${APP_ID}
     id: ${output.homeScreen.searchInput}
 - inputText: "shirts"
 - pressKey: Enter
-- tapOn: 
-    id: ${output.plpScreen.backButton}
-- tapOn: 
-    id: ${output.searchScreen.backButton}
-- tapOn:
-    id: ${output.searchScreen.textToSearch}
+- runFlow: ../../../generics/actions/backAndTapSearch.yaml
 - assertVisible: "shirts"
 - tapOn:
     id: ${output.searchScreen.clearRecentSearches}

@@ -10,4 +10,10 @@ appId: ${APP_ID}
 - assertVisible:
     id: ${output.plpScreen.productCard}
 - assertVisible:
+    when:
+        platform: "Android"
+    id: ${output.plpScreen.titleHeader}
+- assertVisible:
+    when:
+        platform: "iOS"
     id: ${output.plpScreen.resultsLabel} 

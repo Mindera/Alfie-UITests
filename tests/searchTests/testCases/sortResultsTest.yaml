@@ -11,7 +11,17 @@ appId: ${APP_ID}
     id: ${output.plpScreen.productCard}
 - tapOn: 
     id: ${output.plpScreen.filterButton}
-- tapOn: "A-Z"
-- tapOn: "Show results"
-- assertVisible:
-    id: ${output.plpScreen.productCard} # Verify sort is applied 
+#The following Run Flow should be removed when Android has the sort implemented#
+- runFlow:
+    when:
+      platform: "iOS"
+    commands:
+      - tapOn: "A-Z"
+      - tapOn: "Show results"
+      - assertVisible:
+            id: ${output.plpScreen.productCard} # Verify sort is applied 
+            id: ${output.homeScreen.searchInput}
+      - inputText: "😀 🎉 🌟"
+      - assertNotVisible:
+            id: ${output.plpScreen.productCard} 
+# Verify sort is applied 

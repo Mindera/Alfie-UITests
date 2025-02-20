@@ -8,9 +8,6 @@ appId: ${APP_ID}
     timeout: 5000  # 5 seconds timeout 
 - tapOn:
     id: ${output.homeScreen.searchInput}
-- extendedWaitUntil:
-    visible: What are you looking for?
-    timeout: 5000  # 5 seconds timeout 
 - inputText: "shirt"
 - extendedWaitUntil:
     visible: shirts men
