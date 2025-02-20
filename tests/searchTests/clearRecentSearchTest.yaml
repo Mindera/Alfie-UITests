@@ -1,15 +1,15 @@
 appId: ${APP_ID}
- tags:
-   - searchTests
+name: Clear Search History
+tags:
+    - searchTests
 ---
-# Test Case 10: Clear search history
-- runFlow: ../../../generics/setup/launchApp.yaml
+- runFlow: ../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
     id: ${output.homeScreen.searchInput}
 - inputText: "shirts"
 - pressKey: Enter
-- runFlow: ../../../generics/actions/backAndTapSearch.yaml
+- runFlow: ../../generics/actions/backAndTapSearch.yaml
 - assertVisible: "shirts"
 - tapOn:
     id: ${output.searchScreen.clearRecentSearches}

@@ -1,13 +1,13 @@
 appId: ${APP_ID}
- tags:
-   - searchTests
+name: Recent Search
+tags:
+    - searchTests
 ---
-# Test Case 9: Search History (Your Recent Searches)
-- runFlow: ../../../generics/setup/launchApp.yaml
+- runFlow: ../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
     id: ${output.homeScreen.searchInput}
 - inputText: "shirts"
 - pressKey: Enter
-- runFlow: ../../../generics/actions/backAndTapSearch.yaml
+- runFlow: ../../generics/actions/backAndTapSearch.yaml
 - assertVisible: "shirts"  # Verify that last search appears in Search history 

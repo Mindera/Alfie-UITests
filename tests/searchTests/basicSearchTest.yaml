@@ -1,25 +1,25 @@
 appId: ${APP_ID}
- tags:
-   - searchTests
+name: Basic Search 
+tags:
+    - searchTests
 ---
-# Test Case 1: Basic Search
-- runFlow: ../../../generics/setup/launchApp.yaml
+- runFlow: ../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible: Home
-    timeout: 5000  # 5 seconds timeout 
+    timeout: ${output.elementVisibleTimeout}
 - tapOn:
     id: ${output.homeScreen.searchInput}
 - inputText: "shirt"
 - extendedWaitUntil:
     visible: shirts men
-    timeout: 5000  # 5 seconds timeout 
+    timeout: ${output.elementVisibleTimeout}
 - tapOn: "Shirts Men"
 - extendedWaitUntil:
     visible: "clarisse button mini"
-    timeout: 5000  # 5 seconds timeout 
+    timeout: ${output.elementVisibleTimeout}
 - tapOn: "clarisse button mini"
 - extendedWaitUntil:
     visible: "Add to bag"
-    timeout: 5000  # 5 seconds timeout 
+    timeout: ${output.elementVisibleTimeout}
 - tapOn: "Add to bag"

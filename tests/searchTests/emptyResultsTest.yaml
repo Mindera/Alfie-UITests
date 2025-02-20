@@ -1,9 +1,9 @@
 appId: ${APP_ID}
- tags:
-   - searchTests
+name: Search With Empty Results
+tags:
+    - searchTests
 ---
-# Test Case 02: Search return 0 products
-- runFlow: ../../../generics/setup/launchApp.yaml
+- runFlow: ../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
     id: ${output.homeScreen.searchInput}

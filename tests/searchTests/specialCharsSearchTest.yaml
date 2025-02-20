@@ -1,15 +1,15 @@
 appId: ${APP_ID}
- tags:
-   - searchTests
+name: Special Characters Search
+tags:
+    - searchTests
 ---
-# Test Case 5: Special Characters Search
-- runFlow: ../../../generics/setup/launchApp.yaml
+- runFlow: ../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
     id: ${output.homeScreen.searchInput}
 - extendedWaitUntil:
     visible: What are you looking for?
-    timeout: 5000
+    timeout:  ${output.elementVisibleTimeout}
 - inputText: "@#$%"
 # The following line should run only if we are NOT using Mock Server #
 #- assertVisible: "We were unable to find any results for your search ‘@#$%’" # Verify handling of special characters 

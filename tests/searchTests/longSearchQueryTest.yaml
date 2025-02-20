@@ -1,9 +1,9 @@
 appId: ${APP_ID}
- tags:
-   - searchTests
+name: Very Long Text Search
+tags:
+    - searchTests
 ---
-# Test Case 06: Very long text search
-- runFlow: ../../../generics/setup/launchApp.yaml
+- runFlow: ../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
     id: ${output.homeScreen.searchInput}

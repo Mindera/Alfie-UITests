@@ -124,4 +124,9 @@ fi
 echo "🚀 Running tests for $platform..."
 echo "🏷️  Running tests with tag: $tag"
 echo "🆔 App ID: $APP_ID"
-maestro test --env APP_ID="$APP_ID" --include-tags="$tag"
+
+# Generate timestamp for report file
+timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
+report_file="reports/${timestamp}-report.html"
+
+maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file"
