@@ -1,4 +1,6 @@
 appId: ${APP_ID}
+ tags:
+   - searchTests
 ---
 # Test Case 03: Search return several products
 - runFlow: ../../../generics/setup/launchApp.yaml

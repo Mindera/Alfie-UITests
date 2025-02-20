@@ -1,4 +1,6 @@
 appId: ${APP_ID}
+ tags:
+   - searchTests
 ---
 # Test Case 11: Search results sort
 - runFlow: ../../../generics/setup/launchApp.yaml

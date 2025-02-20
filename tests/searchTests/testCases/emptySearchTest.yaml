@@ -1,4 +1,6 @@
 appId: ${APP_ID}
+ tags:
+   - searchTests
 ---
 # Test Case 4: Empty Search
 - runFlow: ../../../generics/setup/launchApp.yaml

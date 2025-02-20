@@ -2,50 +2,15 @@
 
 # Check if required arguments were provided
 if [ $# -lt 2 ]; then
-    echo "How to Run: ./run-tests.sh <platform> <test_suite>"
+    echo "How to Run: ./run-tests.sh <platform> <tag>"
     echo "Example: ./run-tests.sh ios searchTests"
-    echo "Available test suites:"
-    echo "  - searchTests    : Search functionality tests"
-    echo "  - loginTests     : Login flow tests"
+    echo "Available tags:"
+    echo "  - searchTests : Search functionality tests"
     exit 1
 fi
 
 platform=$1
-test_suite=$2
-
-# Dictionary of test suites and their paths
-declare -A TEST_SUITES=(
-    ["searchTests"]="tests/searchTests/testCases"
-    ["loginTests"]="tests/loginTests/testCases"
-)
-
-# Function to validate and get test suite path
-get_test_suite_path() {
-    local suite=$1
-    local suite_path=${TEST_SUITES[$suite]}
-    
-    if [ -z "$suite_path" ]; then
-        echo "❌ Error: Invalid test suite '$suite'"
-        echo "Available test suites:"
-        for key in "${!TEST_SUITES[@]}"; do
-            echo "  - $key"
-        done
-        exit 1
-    fi
-    
-    if [ ! -d "$suite_path" ]; then
-        echo "❌ Error: Test suite directory not found at $suite_path"
-        exit 1
-    fi
-    
-    echo "✅ Running test suite: $suite"
-    echo "📂 Test path: $suite_path"
-    return 0
-}
-
-# Validate test suite and get path
-get_test_suite_path "$test_suite"
-suite_path=${TEST_SUITES[$test_suite]}
+tag=$2
 
 # Function to check iOS device
 check_ios_simulator() {
@@ -157,6 +122,6 @@ fi
 
 # Run tests
 echo "🚀 Running tests for $platform..."
-echo "📝 Test suite: $test_suite"
+echo "🏷️  Running tests with tag: $tag"
 echo "🆔 App ID: $APP_ID"
-maestro test --env APP_ID="$APP_ID" --format junit reports/ "$suite_path"
+maestro test --env APP_ID="$APP_ID" --include-tags="$tag"

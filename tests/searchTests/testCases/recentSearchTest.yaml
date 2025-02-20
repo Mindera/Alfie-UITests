@@ -1,4 +1,6 @@
 appId: ${APP_ID}
+ tags:
+   - searchTests
 ---
 # Test Case 9: Search History (Your Recent Searches)
 - runFlow: ../../../generics/setup/launchApp.yaml

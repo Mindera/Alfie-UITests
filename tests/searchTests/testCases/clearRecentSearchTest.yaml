@@ -1,4 +1,6 @@
 appId: ${APP_ID}
+ tags:
+   - searchTests
 ---
 # Test Case 10: Clear search history
 - runFlow: ../../../generics/setup/launchApp.yaml

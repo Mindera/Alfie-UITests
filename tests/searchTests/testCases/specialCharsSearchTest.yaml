@@ -1,4 +1,6 @@
 appId: ${APP_ID}
+ tags:
+   - searchTests
 ---
 # Test Case 5: Special Characters Search
 - runFlow: ../../../generics/setup/launchApp.yaml

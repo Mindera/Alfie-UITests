@@ -1,4 +1,6 @@
 appId: ${APP_ID}
+ tags:
+   - searchTests
 ---
 # Test Case 06: Very long text search
 - runFlow: ../../../generics/setup/launchApp.yaml
