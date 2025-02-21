@@ -4,5 +4,3 @@ appId: ${APP_ID}
     id: ${output.plpScreen.backButton}
 - tapOn: 
     id: ${output.searchScreen.backButton}
-- tapOn:
-    id: ${output.searchScreen.textToSearch}

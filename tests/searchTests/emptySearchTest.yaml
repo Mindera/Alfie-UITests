@@ -11,7 +11,7 @@ tags:
     visible: What are you looking for?
     timeout: ${output.elementVisibleTimeout}
 - inputText: ""
-#- pressKey: Enter
-- assertVisible: "Your Recent Searches"
+- assertVisible:
+    id: ${output.searchScreen.emptyScreen}
 - assertNotVisible:
     id: ${output.plpScreen.productCard}

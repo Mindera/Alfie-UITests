@@ -21,9 +21,4 @@ tags:
       - tapOn: "A-Z"
       - tapOn: "Show results"
       - assertVisible:
-            id: ${output.plpScreen.productCard} # Verify sort is applied 
-            id: ${output.homeScreen.searchInput}
-      - inputText: "😀 🎉 🌟"
-      - assertNotVisible:
-            id: ${output.plpScreen.productCard} 
-# Verify sort is applied 
+            id: ${output.plpScreen.productCard} # Verify sort is applied

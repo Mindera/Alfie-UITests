@@ -10,8 +10,9 @@ tags:
 - inputText: "shirts"
 - pressKey: Enter
 - runFlow: ../../generics/actions/backAndTapSearch.yaml
+- tapOn: 
+    id: ${output.homeScreen.searchInput}
 - assertVisible: "shirts"
-- tapOn:
-    id: ${output.searchScreen.clearRecentSearches}
+- tapOn: ${output.searchScreen.clearRecentSearches}
 - assertVisible:
     id: ${output.searchScreen.emptyScreen}

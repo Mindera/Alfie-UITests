@@ -5,7 +5,7 @@ output.searchScreen = {
     magnifier: 'magnifyingglass',	
     closeButton: 'close-btn',
     recenteSearchTitle: 'recent-search-title',
-    clearRecentSearches: 'clear-recent-searches',
+    clearRecentSearches: 'clear',
     recentSearchItem: 'recent-search-item',
     removeEntryButton: 'close-btn',
     searchSuggestionsTitle: 'search-suggestions-title',
