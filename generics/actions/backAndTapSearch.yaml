@@ -10,4 +10,3 @@ appId: ${APP_ID}
         platform: "iOS"
     commands:
         - runFlow: iOS/iOSBackAndTapSearch.yaml
-- launchApp
