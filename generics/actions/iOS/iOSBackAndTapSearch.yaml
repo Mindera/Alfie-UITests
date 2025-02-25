@@ -1,0 +1,6 @@
+appId: ${APP_ID}
+---
+- tapOn: 
+    id: ${output.plpScreen.backButton}
+- tapOn: 
+    id: ${output.searchScreen.backButton}

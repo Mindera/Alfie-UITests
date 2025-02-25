@@ -1,0 +1,17 @@
+appId: ${APP_ID}
+name: Empty Query Search
+tags:
+    - searchTests
+---
+- runFlow: ../../generics/setup/launchApp.yaml
+- waitForAnimationToEnd
+- tapOn:
+    id: ${output.homeScreen.searchInput}
+- extendedWaitUntil:
+    visible: What are you looking for?
+    timeout: ${output.elementVisibleTimeout}
+- inputText: ""
+- assertVisible:
+    id: ${output.searchScreen.emptyScreen}
+- assertNotVisible:
+    id: ${output.plpScreen.productCard}

@@ -1,0 +1,25 @@
+appId: ${APP_ID}
+name: Basic Search 
+tags:
+    - searchTests
+---
+- runFlow: ../../generics/setup/launchApp.yaml
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: Home
+    timeout: ${output.elementVisibleTimeout}
+- tapOn:
+    id: ${output.homeScreen.searchInput}
+- inputText: "shirt"
+- extendedWaitUntil:
+    visible: shirts men
+    timeout: ${output.elementVisibleTimeout}
+- tapOn: "Shirts Men"
+- extendedWaitUntil:
+    visible: "clarisse button mini"
+    timeout: ${output.elementVisibleTimeout}
+- tapOn: "clarisse button mini"
+- extendedWaitUntil:
+    visible: "Add to bag"
+    timeout: ${output.elementVisibleTimeout}
+- tapOn: "Add to bag"

@@ -1,0 +1,12 @@
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+        platform: "Android"
+    commands:
+        - runFlow: android/androidBackAndTapSearch.yaml
+- runFlow:
+    when:
+        platform: "iOS"
+    commands:
+        - runFlow: iOS/iOSBackAndTapSearch.yaml

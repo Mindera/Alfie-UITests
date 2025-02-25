@@ -1,0 +1,15 @@
+appId: ${APP_ID}
+name: Recent Search
+tags:
+    - searchTests
+---
+- runFlow: ../../generics/setup/launchApp.yaml
+- waitForAnimationToEnd
+- tapOn:
+    id: ${output.homeScreen.searchInput}
+- inputText: "shirts"
+- pressKey: Enter
+- runFlow: ../../generics/actions/backAndTapSearch.yaml
+- tapOn: 
+    id: ${output.homeScreen.searchInput}
+- assertVisible: "shirts"  # Verify that last search appears in Search history 

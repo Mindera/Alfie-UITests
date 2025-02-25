@@ -1,0 +1,24 @@
+appId: ${APP_ID}
+name: Sort Search Results
+tags:
+    - searchTests
+---
+- runFlow: ../../generics/setup/launchApp.yaml
+- waitForAnimationToEnd
+- tapOn:
+    id: ${output.homeScreen.searchInput}
+- inputText: "shirt"
+- tapOn: "shirts women"
+- assertVisible:
+    id: ${output.plpScreen.productCard}
+#The following Run Flow should be removed when Android has the sort implemented#
+- runFlow:
+    when:
+      platform: "iOS"
+    commands:
+      - tapOn: 
+            id: ${output.plpScreen.filterButton}
+      - tapOn: "A-Z"
+      - tapOn: "Show results"
+      - assertVisible:
+            id: ${output.plpScreen.productCard} # Verify sort is applied

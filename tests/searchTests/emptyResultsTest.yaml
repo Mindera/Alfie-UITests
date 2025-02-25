@@ -1,24 +1,18 @@
-appId: com.mindera.alfie.debug #iOS
-#appId: au.com.alfie.ecomm.debug #Android
+appId: ${APP_ID}
+name: Search With Empty Results
+tags:
+    - searchTests
 ---
-# Test Case 02: Search return 0 products
-- launchApp
+- runFlow: ../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
-- runScript: 
-    file: ../../screens/ios/homeScreen/homeScreen.js
 - tapOn:
     id: ${output.homeScreen.searchInput}
 - inputText: "zxcvbnm"
-- runScript: 
-    file: ../../screens/ios/searchScreen/searchScreen.js
-- runScript:
-    file: ../../screens/ios/plpScreen/plpScreen.js
 
 # The following line should run only if we are NOT using Mock Server #
 #- assertVisible: "We were unable to find any results for your search ‘zxcvbnm’"
 
 # The following line should run only if we ARE using Mock Server #
 - assertVisible: "Search Suggestions"
-
 - assertNotVisible:
     id: ${output.plpScreen.productCard}

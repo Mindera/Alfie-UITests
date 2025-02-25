@@ -1,0 +1,8 @@
+appId: ${APP_ID}
+---
+- runScript:
+    file: ./homeScreen/homeScreen.js
+- runScript:
+    file: ./plpScreen/plpScreen.js
+- runScript:
+    file: ./searchScreen/searchScreen.js

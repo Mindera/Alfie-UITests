@@ -1,0 +1,19 @@
+appId: ${APP_ID}
+---
+- runScript:
+    file: ../configuration/config.js
+- runFlow:
+    when:
+        platform: "Android"
+    commands:
+        - runFlow: ../../screens/Android/androidElements.yaml
+- runFlow:
+    when:
+        platform: "iOS"
+    commands:
+        - runFlow: ../../screens/iOS/iOSElements.yaml
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    permissions:
+        all: allow
