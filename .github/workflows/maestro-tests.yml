@@ -48,8 +48,10 @@ jobs:
           echo "y" | sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
           echo "y" | sdkmanager --licenses
 
-      - name: Create artifacts directory
-        run: mkdir -p artifacts
+      - name: Create required directories
+        run: |
+          mkdir -p artifacts
+          mkdir -p reports
 
       # Platform specific app download and setup
       - name: Setup iOS app
