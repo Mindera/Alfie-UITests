@@ -80,8 +80,18 @@ jobs:
         run: chmod +x scripts/run-tests.sh
 
       - name: Run Maestro tests
-        run: ./scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }}
-        
+        run: |
+          # Ensure reports directory exists
+          mkdir -p reports
+          
+          # Run tests with explicit output path
+          ./scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }}
+          
+          # Create a dummy report if none exists (to prevent upload failure)
+          if [ ! -f reports/* ]; then
+            echo "No test reports generated" > reports/test-summary.txt
+          fi
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v3
