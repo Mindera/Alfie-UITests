@@ -1,0 +1,89 @@
+name: Maestro UI Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to test (ios/android)'
+        required: true
+        type: choice
+        options:
+          - ios
+          - android
+      app_url:
+        description: 'URL to download the app binary (.app/.apk)'
+        required: true
+      test_tag:
+        description: 'Test tag to run (e.g., searchTests)'
+        required: true
+        default: 'searchTests'
+
+jobs:
+  mobile-test:
+    name: Run ${{ github.event.inputs.platform }} UI Tests
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
+
+      # iOS specific setup
+      - name: Setup iOS dependencies
+        if: github.event.inputs.platform == 'ios'
+        run: |
+          # Setup Xcode
+          sudo xcode-select --switch /Applications/Xcode.app
+          xcrun simctl list devices
+
+      # Android specific setup
+      - name: Setup Android dependencies
+        if: github.event.inputs.platform == 'android'
+        run: |
+          # Setup Android SDK
+          echo "y" | sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+          echo "y" | sdkmanager --licenses
+
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
+
+      # Platform specific app download and setup
+      - name: Setup iOS app
+        if: github.event.inputs.platform == 'ios'
+        run: |
+          curl -L "${{ github.event.inputs.app_url }}" -o artifacts/app.zip
+          cd artifacts && unzip app.zip && rm app.zip
+          mv *.app Alfie.app
+          
+          # Start simulator
+          DEVICE_ID=$(xcrun xctrace list devices | grep -m 1 "iPhone" | awk '{print $NF}' | tr -d '()')
+          xcrun simctl boot "${DEVICE_ID:?No iPhone simulator found}"
+
+      - name: Setup Android app
+        if: github.event.inputs.platform == 'android'
+        run: |
+          curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
+          
+          # Start emulator
+          echo "y" | sdkmanager "system-images;android-31;google_apis;x86_64"
+          echo "no" | avdmanager create avd -n test -k "system-images;android-31;google_apis;x86_64"
+          $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window &
+          adb wait-for-device
+
+      - name: Give permission to run script
+        run: chmod +x scripts/run-tests.sh
+
+      - name: Run Maestro tests
+        run: ./scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }}
+        
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.inputs.platform }}-test-results
+          path: reports/
+          retention-days: 30 
