@@ -18,11 +18,34 @@ check_ios_simulator() {
     booted_device=$(xcrun simctl list devices | grep "Booted" | head -n 1 | awk -F "[()]" '{print $2}')
     
     if [ -z "$booted_device" ]; then
-        echo "❌ Error: No iOS simulator is running"
-        echo "Please start a simulator first"
-        exit 1
+        echo "No simulator running. Creating and booting a new one..."
+        
+        # Get latest iOS runtime
+        RUNTIME=$(xcrun simctl list runtimes | grep iOS | tail -n1 | cut -d ' ' -f7)
+        
+        # Create iPhone 14 simulator if it doesn't exist
+        DEVICE_NAME="iPhone 14"
+        DEVICE_ID=$(xcrun simctl list devices | grep "$DEVICE_NAME" | head -n1 | awk -F "[()]" '{print $2}')
+        
+        if [ -z "$DEVICE_ID" ]; then
+            echo "Creating new $DEVICE_NAME simulator..."
+            DEVICE_ID=$(xcrun simctl create "$DEVICE_NAME" "com.apple.CoreSimulator.SimDeviceType.iPhone-14" "$RUNTIME")
+        fi
+        
+        echo "Booting simulator $DEVICE_ID..."
+        xcrun simctl boot "$DEVICE_ID"
+        
+        # Wait for simulator to be ready
+        echo "Waiting for simulator to be ready..."
+        sleep 5
+        
+        # Enable keyboard
+        xcrun simctl keyboard "$DEVICE_ID" sysdiagnose
+        
+        echo "✅ Simulator ready: $DEVICE_NAME ($DEVICE_ID)"
+    else
+        echo "✅ Found booted simulator: $booted_device"
     fi
-    echo "✅ Found booted simulator: $booted_device"
     return 0
 }
 
@@ -32,11 +55,31 @@ check_android_device() {
     device_id=$(adb devices | grep -v "List" | grep "device$" | head -n 1 | cut -f1)
     
     if [ -z "$device_id" ]; then
-        echo "❌ Error: No Android device/emulator connected"
-        echo "Please connect a device or start an emulator first"
-        exit 1
+        echo "No emulator running. Creating and starting a new one..."
+        
+        # Check if AVD exists
+        if ! avdmanager list avd | grep -q "test_device"; then
+            echo "Creating new emulator..."
+            echo "y" | sdkmanager "system-images;android-31;google_apis;x86_64"
+            echo "no" | avdmanager create avd -n test_device -k "system-images;android-31;google_apis;x86_64"
+        fi
+        
+        # Start emulator in background
+        echo "Starting emulator..."
+        $ANDROID_HOME/emulator/emulator -avd test_device -no-audio -no-window &
+        
+        # Wait for device to be ready
+        echo "Waiting for emulator to be ready..."
+        adb wait-for-device
+        
+        # Additional wait to ensure device is fully booted
+        sleep 10
+        
+        device_id=$(adb devices | grep -v "List" | grep "device$" | head -n 1 | cut -f1)
+        echo "✅ Emulator ready: $device_id"
+    else
+        echo "✅ Found Android device: $device_id"
     fi
-    echo "✅ Found Android device: $device_id"
     return 0
 }
 
@@ -129,4 +172,5 @@ echo "🆔 App ID: $APP_ID"
 timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
 report_file="reports/${timestamp}-report.html"
 
+# Run tests with explicit output path
 maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file"
