@@ -59,7 +59,19 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/app.zip
           cd artifacts && unzip app.zip && rm app.zip
-          mv *.app Alfie.app
+          
+          # Only rename if needed
+          if [ ! -d "Alfie.app" ] && [ -n "$(find . -name '*.app' ! -name 'Alfie.app')" ]; then
+            mv *.app Alfie.app
+          fi
+          
+          # Verify app exists
+          if [ ! -d "Alfie.app" ]; then
+            echo "❌ Error: No Alfie.app found after extraction"
+            echo "Contents of artifacts directory:"
+            ls -la
+            exit 1
+          fi
           
           # Start simulator
           DEVICE_ID=$(xcrun xctrace list devices | grep -m 1 "iPhone" | awk '{print $NF}' | tr -d '()')

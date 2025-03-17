@@ -23,8 +23,8 @@ check_ios_simulator() {
         # Get latest iOS runtime
         RUNTIME=$(xcrun simctl list runtimes | grep iOS | tail -n1 | cut -d ' ' -f7)
         
-        # Create iPhone 14 simulator if it doesn't exist
-        DEVICE_NAME="iPhone 14"
+        # Create iPhone 16 simulator if it doesn't exist
+        DEVICE_NAME="iPhone 16"
         DEVICE_ID=$(xcrun simctl list devices | grep "$DEVICE_NAME" | head -n1 | awk -F "[()]" '{print $2}')
         
         if [ -z "$DEVICE_ID" ]; then
