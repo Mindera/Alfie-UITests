@@ -73,9 +73,21 @@ jobs:
             exit 1
           fi
           
-          # Start simulator
+          # Start simulator and verify
           DEVICE_ID=$(xcrun xctrace list devices | grep -m 1 "iPhone" | awk '{print $NF}' | tr -d '()')
           xcrun simctl boot "${DEVICE_ID:?No iPhone simulator found}"
+          
+          # Wait for simulator to be fully ready
+          echo "Waiting for simulator to be ready..."
+          sleep 30
+          
+          # Verify simulator and app state
+          xcrun simctl list devices | grep Booted
+          echo "Launching app to verify installation..."
+          xcrun simctl launch booted "com.mindera.alfie.debug"
+          sleep 5
+          xcrun simctl terminate booted "com.mindera.alfie.debug"
+          sleep 2
 
       - name: Setup Android app
         if: github.event.inputs.platform == 'android'
@@ -92,6 +104,9 @@ jobs:
         run: chmod +x scripts/run-tests.sh
 
       - name: Run Maestro tests
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: 120000
+          MAESTRO_CLI_NO_ANALYTICS: "true"
         run: |
           # Ensure reports directory exists
           mkdir -p reports
@@ -99,7 +114,7 @@ jobs:
           # Run tests with explicit output path
           ./scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }}
           
-          # Create a dummy report if none exists (to prevent upload failure)
+          # Create a dummy report if none exists
           if [ ! -f reports/* ]; then
             echo "No test reports generated" > reports/test-summary.txt
           fi
