@@ -64,9 +64,7 @@ jobs:
           # Wait for simulator to be fully ready
           echo "Waiting for simulator to be ready..."
           xcrun simctl list devices | grep Booted
-          
-          # Set status bar with correct time format
-          xcrun simctl status_bar "$DEVICE_ID" override --time "12:00:00" --dataNetwork wifi
+          sleep 5  # Give simulator a moment to stabilize
           
           # Now download and install the app
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/app.zip
