@@ -64,7 +64,9 @@ jobs:
           # Wait for simulator to be fully ready
           echo "Waiting for simulator to be ready..."
           xcrun simctl list devices | grep Booted
-          xcrun simctl status_bar "$DEVICE_ID" override --time "12:00" --dataNetwork wifi --wifiMode active --cellularMode active
+          
+          # Set status bar with correct time format
+          xcrun simctl status_bar "$DEVICE_ID" override --time "12:00:00" --dataNetwork wifi
           
           # Now download and install the app
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/app.zip
@@ -73,7 +75,8 @@ jobs:
           # Only rename if needed
           if [ ! -d "Alfie.app" ] && [ -n "$(find . -name '*.app' ! -name 'Alfie.app')" ]; then
             mv *.app Alfie.app
-
+          fi
+          
           # Install the app
           echo "Installing app..."
           xcrun simctl install booted "Alfie.app"
