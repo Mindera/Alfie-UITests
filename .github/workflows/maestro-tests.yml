@@ -57,14 +57,22 @@ jobs:
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
         run: |
-          # Start simulator first and ensure it's ready
-          DEVICE_ID=$(xcrun xctrace list devices | grep -m 1 "iPhone" | awk '{print $NF}' | tr -d '()')
-          xcrun simctl boot "${DEVICE_ID:?No iPhone simulator found}"
+          # Create a new simulator
+          RUNTIME_ID=$(xcrun simctl list runtimes | grep iOS | tail -n1 | cut -d ' ' -f7)
+          DEVICE_NAME="iPhone 15"
+          DEVICE_ID=$(xcrun simctl create "$DEVICE_NAME" "com.apple.CoreSimulator.SimDeviceType.iPhone-15" "$RUNTIME_ID")
+          echo "Created simulator: $DEVICE_ID"
+          
+          # Boot simulator
+          xcrun simctl boot "$DEVICE_ID"
           
           # Wait for simulator to be fully ready
           echo "Waiting for simulator to be ready..."
-          xcrun simctl list devices | grep Booted
-          sleep 5  # Give simulator a moment to stabilize
+          until xcrun simctl list devices | grep -q "$DEVICE_ID.*Booted"; do
+            echo "Waiting for simulator to boot..."
+            sleep 2
+          done
+          echo "Simulator is ready"
           
           # Now download and install the app
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/app.zip
@@ -77,17 +85,17 @@ jobs:
           
           # Install the app
           echo "Installing app..."
-          xcrun simctl install booted "Alfie.app"
+          xcrun simctl install "$DEVICE_ID" "Alfie.app"
           
           # Verify installation
-          if xcrun simctl get_app_container booted "com.mindera.alfie.debug" > /dev/null 2>&1; then
+          if xcrun simctl get_app_container "$DEVICE_ID" "com.mindera.alfie.debug" > /dev/null 2>&1; then
             echo "✅ App installed successfully"
           else
             echo "❌ Failed to install app"
             echo "App container contents:"
-            xcrun simctl get_app_container booted "com.mindera.alfie.debug" || true
+            xcrun simctl get_app_container "$DEVICE_ID" "com.mindera.alfie.debug" || true
             echo "Simulator apps:"
-            xcrun simctl listapps booted
+            xcrun simctl listapps "$DEVICE_ID"
             exit 1
           fi
 
