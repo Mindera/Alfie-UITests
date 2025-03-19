@@ -14,72 +14,65 @@ tag=$2
 
 # Function to check iOS device
 check_ios_simulator() {
-    local booted_device
-    booted_device=$(xcrun simctl list devices | grep "Booted" | head -n 1 | awk -F "[()]" '{print $2}')
+    echo "Setting up 3 simulators..."
+    local RUNTIME=$(xcrun simctl list runtimes | grep iOS | tail -n1 | cut -d ' ' -f7)
+    local simulators=()
     
-    if [ -z "$booted_device" ]; then
-        echo "No simulator running. Creating and booting a new one..."
+    # Create and boot 3 simulators
+    for i in {1..3}; do
+        DEVICE_NAME="iPhone 15 Test $i"
+        DEVICE_ID=$(xcrun simctl create "$DEVICE_NAME" "com.apple.CoreSimulator.SimDeviceType.iPhone-15" "$RUNTIME")
+        echo "Created simulator $i: $DEVICE_ID"
         
-        # Get latest iOS runtime
-        RUNTIME=$(xcrun simctl list runtimes | grep iOS | tail -n1 | cut -d ' ' -f7)
-        
-        # Create iPhone 16 simulator if it doesn't exist
-        DEVICE_NAME="iPhone 16"
-        DEVICE_ID=$(xcrun simctl list devices | grep "$DEVICE_NAME" | head -n1 | awk -F "[()]" '{print $2}')
-        
-        if [ -z "$DEVICE_ID" ]; then
-            echo "Creating new $DEVICE_NAME simulator..."
-            DEVICE_ID=$(xcrun simctl create "$DEVICE_NAME" "com.apple.CoreSimulator.SimDeviceType.iPhone-14" "$RUNTIME")
-        fi
-        
-        echo "Booting simulator $DEVICE_ID..."
         xcrun simctl boot "$DEVICE_ID"
+        echo "Booting simulator $i..."
         
         # Wait for simulator to be ready
-        echo "Waiting for simulator to be ready..."
-        sleep 5
+        until xcrun simctl list devices | grep -q "$DEVICE_ID.*Booted"; do
+            echo "Waiting for simulator $i to boot..."
+            sleep 2
+        done
         
-        # Enable keyboard
-        xcrun simctl keyboard "$DEVICE_ID" sysdiagnose
-        
-        echo "✅ Simulator ready: $DEVICE_NAME ($DEVICE_ID)"
-    else
-        echo "✅ Found booted simulator: $booted_device"
-    fi
+        # Install app on each simulator
+        xcrun simctl install "$DEVICE_ID" "$APP_PATH"
+        simulators+=("$DEVICE_ID")
+    done
+    
+    echo "✅ All simulators ready: ${simulators[*]}"
     return 0
 }
 
 # Function to check Android device
 check_android_device() {
-    local device_id
-    device_id=$(adb devices | grep -v "List" | grep "device$" | head -n 1 | cut -f1)
+    echo "Setting up 3 emulators..."
+    local emulators=()
     
-    if [ -z "$device_id" ]; then
-        echo "No emulator running. Creating and starting a new one..."
+    for i in {1..3}; do
+        local avd_name="test_device_$i"
         
-        # Check if AVD exists
-        if ! avdmanager list avd | grep -q "test_device"; then
-            echo "Creating new emulator..."
+        # Create AVD if it doesn't exist
+        if ! avdmanager list avd | grep -q "$avd_name"; then
+            echo "Creating new emulator $i..."
             echo "y" | sdkmanager "system-images;android-31;google_apis;x86_64"
-            echo "no" | avdmanager create avd -n test_device -k "system-images;android-31;google_apis;x86_64"
+            echo "no" | avdmanager create avd -n "$avd_name" -k "system-images;android-31;google_apis;x86_64"
         fi
         
         # Start emulator in background
-        echo "Starting emulator..."
-        $ANDROID_HOME/emulator/emulator -avd test_device -no-audio -no-window &
+        echo "Starting emulator $i..."
+        $ANDROID_HOME/emulator/emulator -avd "$avd_name" -no-audio -no-window &
         
         # Wait for device to be ready
-        echo "Waiting for emulator to be ready..."
         adb wait-for-device
         
-        # Additional wait to ensure device is fully booted
-        sleep 10
+        # Get device ID
+        local device_id=$(adb devices | grep -v "List" | grep "device$" | tail -n1 | cut -f1)
+        emulators+=("$device_id")
         
-        device_id=$(adb devices | grep -v "List" | grep "device$" | head -n 1 | cut -f1)
-        echo "✅ Emulator ready: $device_id"
-    else
-        echo "✅ Found Android device: $device_id"
-    fi
+        # Install app on each emulator
+        adb -s "$device_id" install "$APK_PATH"
+    done
+    
+    echo "✅ All emulators ready: ${emulators[*]}"
     return 0
 }
 
@@ -172,5 +165,11 @@ echo "🆔 App ID: $APP_ID"
 timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
 report_file="reports/${timestamp}-report.html"
 
-# Run tests with explicit output path
-maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file"
+# Run tests with shard split
+maestro test \
+  --env APP_ID="$APP_ID" \
+  --include-tags="$tag" \
+  --format=html \
+  --output="$report_file" \
+  --shard-split 3 \
+  tests/
