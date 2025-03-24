@@ -67,8 +67,9 @@ jobs:
           for i in {1..3}; do
             {
               RUNTIME_ID=$(xcrun simctl list runtimes | grep iOS | tail -n1 | cut -d ' ' -f7)
-              DEVICE_NAME="iPhone 15 Test $i"
-              DEVICE_ID=$(xcrun simctl create "$DEVICE_NAME" "com.apple.CoreSimulator.SimDeviceType.iPhone-15" "$RUNTIME_ID")
+              DEVICE_NAME="iPhone Test $i"
+              DEVICE_TYPE="com.apple.CoreSimulator.SimDeviceType.iPhone-$(expr 14 + $i)"
+              DEVICE_ID=$(xcrun simctl create "$DEVICE_NAME" "$DEVICE_TYPE" "$RUNTIME_ID")
               echo "Created simulator $i: $DEVICE_ID"
               
               xcrun simctl boot "$DEVICE_ID"
