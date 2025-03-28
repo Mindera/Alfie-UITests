@@ -17,7 +17,8 @@ tags:
 #    timeout: ${output.elementVisibleTimeout}
 
 # The following line should run only if we ARE using Mock Server #  
-- assertVisible: "Search Suggestions"  # Verify handling of special characters 
+- assertVisible:   # Verify handling of special characters 
+    text: "Search Suggestions"
     timeout: ${output.elementVisibleTimeout}
     message: "Search suggestions not visible after special characters input"
 - assertNotVisible:
