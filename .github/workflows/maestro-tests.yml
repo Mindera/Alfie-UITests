@@ -71,12 +71,35 @@ jobs:
           xcrun simctl list devices
 
       # Android specific setup
-      - name: Setup Android dependencies
+      - name: Setup Java
+        if: github.event.inputs.platform == 'android'
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        if: github.event.inputs.platform == 'android'
+        uses: android-actions/setup-android@v3
+        
+      - name: Configure Android SDK
         if: github.event.inputs.platform == 'android'
         run: |
-          # Setup Android SDK
-          echo "y" | sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
-          echo "y" | sdkmanager --licenses
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+          
+          # Accept licenses and install required packages
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+          
+          # Verify installation
+          adb --version
+          if [ $? -eq 0 ]; then
+            echo "✅ Android SDK setup complete"
+          else
+            echo "❌ Failed to setup Android SDK"
+            exit 1
+          fi
 
       - name: Create required directories
         run: |
