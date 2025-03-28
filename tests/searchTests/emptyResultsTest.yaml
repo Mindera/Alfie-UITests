@@ -11,8 +11,11 @@ tags:
 
 # The following line should run only if we are NOT using Mock Server #
 #- assertVisible: "We were unable to find any results for your search ‘zxcvbnm’"
+#       timeout: ${output.elementVisibleTimeout}
 
 # The following line should run only if we ARE using Mock Server #
 - assertVisible: "Search Suggestions"
+    timeout: ${output.elementVisibleTimeout}
 - assertNotVisible:
     id: ${output.plpScreen.productCard}
+    timeout: ${output.elementVisibleTimeout}

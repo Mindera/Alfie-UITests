@@ -14,3 +14,4 @@ tags:
       - inputText: "😀 🎉 🌟"
       - assertNotVisible:
             id: ${output.plpScreen.productCard} 
+            timeout: ${output.elementVisibleTimeout}

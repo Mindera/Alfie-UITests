@@ -13,3 +13,4 @@ tags:
 - tapOn: 
     id: ${output.homeScreen.searchInput}
 - assertVisible: "shirts"  # Verify that last search appears in Search history 
+    timeout: ${output.elementVisibleTimeout}
