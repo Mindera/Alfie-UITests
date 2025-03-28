@@ -9,7 +9,8 @@ tags:
     id: ${output.homeScreen.searchInput}
 - extendedWaitUntil:
     visible: What are you looking for?
-    timeout:  ${output.elementVisibleTimeout}
+    timeout: ${output.elementVisibleTimeout}
+    message: "Search prompt not visible after timeout"
 - inputText: "@#$%"
 # The following line should run only if we are NOT using Mock Server #
 #- assertVisible: "We were unable to find any results for your search ‘@#$%’" # Verify handling of special characters 
@@ -18,6 +19,8 @@ tags:
 # The following line should run only if we ARE using Mock Server #  
 - assertVisible: "Search Suggestions"  # Verify handling of special characters 
     timeout: ${output.elementVisibleTimeout}
+    message: "Search suggestions not visible after special characters input"
 - assertNotVisible:
     id: ${output.plpScreen.productCard} 
     timeout: ${output.elementVisibleTimeout}
+    message: "Product cards should not be visible for special characters search"
