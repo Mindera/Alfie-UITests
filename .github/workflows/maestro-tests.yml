@@ -27,6 +27,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Add Mock Server setup
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Checkout Alfie-Mocks repository
+        uses: actions/checkout@v3
+        with:
+          repository: Mindera/Alfie-Mocks
+          path: alfie-mocks
+
+      - name: Install and Start Mock Server
+        run: |
+          cd alfie-mocks
+          npm install apollo-server graphql
+          # Start the mock server in background
+          node index.js &
+          # Wait for server to be ready
+          sleep 5
+          # Verify server is running
+          curl -s http://localhost:4000 > /dev/null
+          if [ $? -eq 0 ]; then
+            echo "✅ Mock server is running"
+          else
+            echo "❌ Failed to start mock server"
+            exit 1
+          fi
+          cd ..
+
       - name: Install Maestro
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
