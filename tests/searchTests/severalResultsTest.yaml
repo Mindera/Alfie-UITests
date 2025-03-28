@@ -11,18 +11,15 @@ tags:
 - pressKey: Enter
 - assertVisible:
     id: ${output.plpScreen.productCard}
-    timeout: ${output.elementVisibleTimeout}
 - runFlow:
     when:
       platform: "iOS"
     commands:
       - assertVisible:
             id: ${output.plpScreen.resultsLabel}
-            timeout: ${output.elementVisibleTimeout}
 - runFlow:
     when:
       platform: "Android"
     commands:
       - assertVisible:
             id: ${output.plpScreen.titleHeader}
-            timeout: ${output.elementVisibleTimeout}

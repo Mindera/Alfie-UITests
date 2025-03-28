@@ -11,7 +11,6 @@ tags:
 - tapOn: "shirts women"
 - assertVisible:
     id: ${output.plpScreen.productCard}
-    timeout: ${output.elementVisibleTimeout}
 #The following Run Flow should be removed when Android has the sort implemented#
 - runFlow:
     when:
@@ -23,4 +22,3 @@ tags:
       - tapOn: "Show results"
       - assertVisible:
             id: ${output.plpScreen.productCard} # Verify sort is applied
-            timeout: ${output.elementVisibleTimeout}

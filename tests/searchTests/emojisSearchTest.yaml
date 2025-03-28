@@ -13,5 +13,4 @@ tags:
             id: ${output.homeScreen.searchInput}
       - inputText: "😀 🎉 🌟"
       - assertNotVisible:
-            id: ${output.plpScreen.productCard} 
-            timeout: ${output.elementVisibleTimeout}
+            id: ${output.plpScreen.productCard}

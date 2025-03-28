@@ -13,8 +13,6 @@ tags:
 - tapOn: 
     id: ${output.homeScreen.searchInput}
 - assertVisible: "shirts"
-    timeout: ${output.elementVisibleTimeout}
 - tapOn: ${output.searchScreen.clearRecentSearches}
 - assertVisible:
     id: ${output.searchScreen.emptyScreen}
-    timeout: ${output.elementVisibleTimeout}

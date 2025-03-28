@@ -10,11 +10,8 @@ tags:
 - inputText: "1234567890"
 # The following line should run only if we are NOT using Mock Server #
 #- assertVisible: "We were unable to find any results for your search ‘1234567890’" # Verify handling of numeric characters 
-#    timeout: ${output.elementVisibleTimeout}
 
 # The following line should run only if we ARE using Mock Server #
 - assertVisible: "Search Suggestions"  # Verify handling of numeric characters 
-    timeout: ${output.elementVisibleTimeout}
 - assertNotVisible:
-    id: ${output.plpScreen.productCard} 
-    timeout: ${output.elementVisibleTimeout}
+    id: ${output.plpScreen.productCard}
