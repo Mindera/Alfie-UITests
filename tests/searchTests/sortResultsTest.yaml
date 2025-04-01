@@ -8,7 +8,9 @@ tags:
 - tapOn:
     id: ${output.homeScreen.searchInput}
 - inputText: "shirt"
+- waitForAnimationToEnd
 - tapOn: "shirts women"
+- waitForAnimationToEnd
 - assertVisible:
     id: ${output.plpScreen.productCard}
 #The following Run Flow should be removed when Android has the sort implemented#
@@ -16,9 +18,12 @@ tags:
     when:
       platform: "iOS"
     commands:
+      - waitForAnimationToEnd
       - tapOn: 
             id: ${output.plpScreen.filterButton}
+      - waitForAnimationToEnd
       - tapOn: "A-Z"
       - tapOn: "Show results"
+      - waitForAnimationToEnd
       - assertVisible:
             id: ${output.plpScreen.productCard} # Verify sort is applied

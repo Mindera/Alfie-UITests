@@ -14,9 +14,8 @@ tags:
 # The following line should run only if we are NOT using Mock Server #
 #- assertVisible: "We were unable to find any results for your search ‘@#$%’" # Verify handling of special characters 
 
-# The following line should run only if we ARE using Mock Server #  
-- extendedWaitUntil: # Verify handling of special characters 
-    visible: "Search Suggestions"
-    timeout: ${output.elementVisibleTimeout}
+# The following line should run only if we ARE using Mock Server #
+- waitForAnimationToEnd
+- assertVisible: "Search Suggestions" # Verify handling of special characters 
 - assertNotVisible:
     id: ${output.plpScreen.productCard}

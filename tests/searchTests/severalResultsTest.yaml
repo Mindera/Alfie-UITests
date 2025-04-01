@@ -9,17 +9,20 @@ tags:
     id: ${output.homeScreen.searchInput}
 - inputText: "shirt"
 - pressKey: Enter
+- waitForAnimationToEnd
 - assertVisible:
     id: ${output.plpScreen.productCard}
 - runFlow:
     when:
       platform: "iOS"
     commands:
+      - waitForAnimationToEnd  
       - assertVisible:
             id: ${output.plpScreen.resultsLabel}
 - runFlow:
     when:
       platform: "Android"
     commands:
+      - waitForAnimationToEnd
       - assertVisible:
             id: ${output.plpScreen.titleHeader}
