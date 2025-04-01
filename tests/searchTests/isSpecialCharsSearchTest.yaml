@@ -1,5 +1,5 @@
 appId: ${APP_ID}
-name: Special Characters Search
+name: Is Special Characters Search
 tags:
     - searchTests
 ---
