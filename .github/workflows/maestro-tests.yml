@@ -175,10 +175,25 @@ jobs:
           mkdir -p reports
           ./scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }}
 
+      - name: Collect test artifacts
+        if: always()
+        run: |
+          # Create directory for all test artifacts
+          mkdir -p test-artifacts
+          
+          # Copy reports
+          cp -r reports/* test-artifacts/ || true
+          
+          # Copy Maestro screenshots (if any tests failed)
+          cp -r ~/.maestro/tests/* test-artifacts/screenshots/ || true
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.inputs.platform }}-test-results
-          path: reports/
+          path: |
+            test-artifacts/
+            reports/
+            ~/.maestro/tests/
           retention-days: 30 
