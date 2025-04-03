@@ -9,20 +9,20 @@ tags:
     id: ${output.homeScreen.searchInput}
 - inputText: "shirt"
 - pressKey: Enter
-- waitForAnimationToEnd
-- assertVisible:
-    id: ${output.plpScreen.productCard}
+- extendedWaitUntil:
+    visible: 
+        id: "product-card"
+        index: 0
+    timeout: ${output.elementVisibleTimeout}
 - runFlow:
     when:
       platform: "iOS"
     commands:
-      - waitForAnimationToEnd  
       - assertVisible:
             id: ${output.plpScreen.resultsLabel}
 - runFlow:
     when:
       platform: "Android"
     commands:
-      - waitForAnimationToEnd
       - assertVisible:
             id: ${output.plpScreen.titleHeader}
