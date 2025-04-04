@@ -158,19 +158,16 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
           
-          # List available system images
-          sdkmanager --list | grep system-images
-          
-          # Use Android 30 (API level 30) instead
-          echo "y" | sdkmanager "system-images;android-30;google_apis;x86"
-          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86"
+          # Use ARM64 image for M1/M2 runners
+          echo "y" | sdkmanager "system-images;android-30;google_apis;arm64-v8a"
+          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;arm64-v8a"
           
           # Create and configure AVD directory
           mkdir -p ~/.android/avd/test.avd/
           echo "hw.cpu.ncore=2" >> ~/.android/avd/test.avd/config.ini
           echo "hw.ramSize=2048" >> ~/.android/avd/test.avd/config.ini
           
-          # Start emulator with specific configurations for CI
+          # Start emulator with ARM-specific configurations
           $ANDROID_HOME/emulator/emulator \
             -avd test \
             -no-audio \
@@ -179,7 +176,8 @@ jobs:
             -gpu swiftshader \
             -no-snapshot \
             -no-accel \
-            -memory 2048 &
+            -memory 2048 \
+            -qemu -cpu cortex-a57 &
             
           # Wait for device with better error handling and logging
           echo "Waiting for emulator to start..."
