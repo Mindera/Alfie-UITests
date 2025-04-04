@@ -158,11 +158,15 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
           
-          # Use x86 image with translation
-          echo "y" | sdkmanager "system-images;android-31;google_apis;x86"
-          echo "no" | avdmanager create avd -n test -k "system-images;android-31;google_apis;x86"
+          # List available system images
+          sdkmanager --list | grep system-images
           
-          # Configure emulator settings
+          # Use Android 30 (API level 30) instead
+          echo "y" | sdkmanager "system-images;android-30;google_apis;x86"
+          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86"
+          
+          # Create and configure AVD directory
+          mkdir -p ~/.android/avd/test.avd/
           echo "hw.cpu.ncore=2" >> ~/.android/avd/test.avd/config.ini
           echo "hw.ramSize=2048" >> ~/.android/avd/test.avd/config.ini
           
@@ -177,22 +181,34 @@ jobs:
             -no-accel \
             -memory 2048 &
             
-          # Wait for device with better error handling
-          timeout 300 bash -c '
-            until adb shell getprop sys.boot_completed 2>&1 | grep -m 1 "1"; do
-              echo "Waiting for emulator to start..."
-              sleep 5
-            done
-          '
+          # Wait for device with better error handling and logging
+          echo "Waiting for emulator to start..."
+          max_attempts=60
+          attempt=0
           
-          # Verify emulator is running
+          while [ $attempt -lt $max_attempts ]; do
+            if adb shell getprop sys.boot_completed 2>&1 | grep -q "1"; then
+              echo "✅ Emulator is ready"
+              break
+            fi
+            echo "Attempt $((attempt+1))/$max_attempts: Waiting for emulator..."
+            attempt=$((attempt+1))
+            sleep 5
+          done
+          
+          # Final verification
           if ! adb devices | grep -q "emulator"; then
-            echo "❌ Emulator failed to start"
+            echo "❌ Emulator failed to start after $max_attempts attempts"
+            echo "ADB devices output:"
+            adb devices
             exit 1
           fi
           
-          # Install app
-          adb install artifacts/Alfie.apk
+          echo "Installing app..."
+          adb install artifacts/Alfie.apk || {
+            echo "❌ Failed to install app"
+            exit 1
+          }
 
       - name: Give permission to run script
         run: chmod +x scripts/run-tests.sh
