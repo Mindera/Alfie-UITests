@@ -60,20 +60,22 @@ check_android_device() {
         # Check if AVD exists
         if ! avdmanager list avd | grep -q "test_device"; then
             echo "Creating new emulator..."
-            echo "y" | sdkmanager "system-images;android-31;google_apis;x86_64"
-            echo "no" | avdmanager create avd -n test_device -k "system-images;android-31;google_apis;x86_64"
+            echo "y" | sdkmanager "system-images;android-31;google_apis;arm64-v8a"
+            echo "no" | avdmanager create avd -n test_device -k "system-images;android-31;google_apis;arm64-v8a"
         fi
         
-        # Start emulator in background
+        # Start emulator with ARM configuration
         echo "Starting emulator..."
-        $ANDROID_HOME/emulator/emulator -avd test_device -no-audio -no-window &
+        $ANDROID_HOME/emulator/emulator \
+            -avd test_device \
+            -no-audio \
+            -no-boot-anim \
+            -no-window \
+            -gpu swiftshader_indirect \
+            -accel off &
         
-        # Wait for device to be ready
-        echo "Waiting for emulator to be ready..."
-        adb wait-for-device
-        
-        # Additional wait to ensure device is fully booted
-        sleep 10
+        # Wait for device with increased timeout
+        adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
         
         device_id=$(adb devices | grep -v "List" | grep "device$" | head -n 1 | cut -f1)
         echo "✅ Emulator ready: $device_id"

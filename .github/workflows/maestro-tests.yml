@@ -158,11 +158,24 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
           
-          # Start emulator
-          echo "y" | sdkmanager "system-images;android-31;google_apis;x86_64"
-          echo "no" | avdmanager create avd -n test -k "system-images;android-31;google_apis;x86_64"
-          $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window &
-          adb wait-for-device
+          # Start emulator with arm64 image instead of x86_64
+          echo "y" | sdkmanager "system-images;android-31;google_apis;arm64-v8a"
+          echo "no" | avdmanager create avd -n test -k "system-images;android-31;google_apis;arm64-v8a"
+          
+          # Start emulator with specific configurations
+          $ANDROID_HOME/emulator/emulator \
+            -avd test \
+            -no-audio \
+            -no-boot-anim \
+            -no-window \
+            -gpu swiftshader_indirect \
+            -accel off &
+            
+          # Wait for device with increased timeout
+          adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+          
+          # Install app
+          adb install artifacts/Alfie.apk
 
       - name: Give permission to run script
         run: chmod +x scripts/run-tests.sh
