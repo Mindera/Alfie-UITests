@@ -158,21 +158,38 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
           
-          # Start emulator with arm64 image instead of x86_64
-          echo "y" | sdkmanager "system-images;android-31;google_apis;arm64-v8a"
-          echo "no" | avdmanager create avd -n test -k "system-images;android-31;google_apis;arm64-v8a"
+          # Use x86 image with translation
+          echo "y" | sdkmanager "system-images;android-31;google_apis;x86"
+          echo "no" | avdmanager create avd -n test -k "system-images;android-31;google_apis;x86"
           
-          # Start emulator with specific configurations
+          # Configure emulator settings
+          echo "hw.cpu.ncore=2" >> ~/.android/avd/test.avd/config.ini
+          echo "hw.ramSize=2048" >> ~/.android/avd/test.avd/config.ini
+          
+          # Start emulator with specific configurations for CI
           $ANDROID_HOME/emulator/emulator \
             -avd test \
             -no-audio \
             -no-boot-anim \
             -no-window \
-            -gpu swiftshader_indirect \
-            -accel off &
+            -gpu swiftshader \
+            -no-snapshot \
+            -no-accel \
+            -memory 2048 &
             
-          # Wait for device with increased timeout
-          adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+          # Wait for device with better error handling
+          timeout 300 bash -c '
+            until adb shell getprop sys.boot_completed 2>&1 | grep -m 1 "1"; do
+              echo "Waiting for emulator to start..."
+              sleep 5
+            done
+          '
+          
+          # Verify emulator is running
+          if ! adb devices | grep -q "emulator"; then
+            echo "❌ Emulator failed to start"
+            exit 1
+          fi
           
           # Install app
           adb install artifacts/Alfie.apk
