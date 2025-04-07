@@ -105,8 +105,8 @@ jobs:
           mkdir -p $ANDROID_AVD_HOME
           mkdir -p $ANDROID_SDK_HOME
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
-          sdkmanager --install "system-images;android-30;google_apis;x86_64"
-          echo "no" | avdmanager --verbose create avd --force --name "test" --package "system-images;android-30;google_apis;x86_64" --device "pixel_2"
+          sdkmanager --install "system-images;android-30;google_apis;armeabi-v7a"
+          echo "no" | avdmanager --verbose create avd --force --name "test" --package "system-images;android-30;google_apis;armeabi-v7a" --device "pixel_2"
           echo "hw.cpu.ncore=2" >> $ANDROID_AVD_HOME/test.avd/config.ini
           echo "hw.ramSize=2048" >> $ANDROID_AVD_HOME/test.avd/config.ini
           echo "hw.lcd.density=420" >> $ANDROID_AVD_HOME/test.avd/config.ini
