@@ -27,7 +27,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Add Mock Server setup
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -43,18 +42,9 @@ jobs:
         run: |
           cd alfie-mocks
           npm install apollo-server graphql
-          # Start the mock server in background
           node index.js &
-          # Wait for server to be ready
           sleep 5
-          # Verify server is running
-          curl -s http://localhost:4000 > /dev/null
-          if [ $? -eq 0 ]; then
-            echo "✅ Mock server is running"
-          else
-            echo "❌ Failed to start mock server"
-            exit 1
-          fi
+          curl -s http://localhost:4000 > /dev/null || exit 1
           cd ..
 
       - name: Install Maestro
@@ -62,15 +52,12 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
 
-      # iOS specific setup
       - name: Setup iOS dependencies
         if: github.event.inputs.platform == 'ios'
         run: |
-          # Setup Xcode
           sudo xcode-select --switch /Applications/Xcode.app
           xcrun simctl list devices
 
-      # Android specific setup
       - name: Setup Java
         if: github.event.inputs.platform == 'android'
         uses: actions/setup-java@v3
@@ -81,179 +68,72 @@ jobs:
       - name: Setup Android SDK
         if: github.event.inputs.platform == 'android'
         uses: android-actions/setup-android@v3
-        
+
       - name: Configure Android SDK
         if: github.event.inputs.platform == 'android'
         run: |
           export ANDROID_HOME=$HOME/android-sdk
           export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
-          
-          # Accept licenses and install required packages
           yes | sdkmanager --licenses
           sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
-          
-          # Verify installation
-          adb --version
-          if [ $? -eq 0 ]; then
-            echo "✅ Android SDK setup complete"
-          else
-            echo "❌ Failed to setup Android SDK"
-            exit 1
-          fi
+          adb --version || exit 1
 
       - name: Create required directories
         run: |
           mkdir -p artifacts
           mkdir -p reports
 
-      # Platform specific app download and setup
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
         run: |
-          # Create a new simulator
           RUNTIME_ID=$(xcrun simctl list runtimes | grep iOS | tail -n1 | cut -d ' ' -f7)
           DEVICE_NAME="iPhone 15"
           DEVICE_ID=$(xcrun simctl create "$DEVICE_NAME" "com.apple.CoreSimulator.SimDeviceType.iPhone-15" "$RUNTIME_ID")
-          echo "Created simulator: $DEVICE_ID"
-          
-          # Boot simulator
           xcrun simctl boot "$DEVICE_ID"
-          
-          # Wait for simulator to be fully ready
-          echo "Waiting for simulator to be ready..."
-          until xcrun simctl list devices | grep -q "$DEVICE_ID.*Booted"; do
-            echo "Waiting for simulator to boot..."
-            sleep 2
-          done
-          echo "Simulator is ready"
-          
-          # Now download and install the app
+          until xcrun simctl list devices | grep -q "$DEVICE_ID.*Booted"; do sleep 2; done
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/app.zip
           cd artifacts && unzip app.zip && rm app.zip
-          
-          # Only rename if needed
-          if [ ! -d "Alfie.app" ] && [ -n "$(find . -name '*.app' ! -name 'Alfie.app')" ]; then
-            mv *.app Alfie.app
-          fi
-          
-          # Install the app
-          echo "Installing app..."
+          [ ! -d "Alfie.app" ] && mv *.app Alfie.app
           xcrun simctl install "$DEVICE_ID" "Alfie.app"
-          
-          # Verify installation
-          if xcrun simctl get_app_container "$DEVICE_ID" "com.mindera.alfie.debug" > /dev/null 2>&1; then
-            echo "✅ App installed successfully"
-          else
-            echo "❌ Failed to install app"
-            echo "App container contents:"
-            xcrun simctl get_app_container "$DEVICE_ID" "com.mindera.alfie.debug" || true
-            echo "Simulator apps:"
-            xcrun simctl listapps "$DEVICE_ID"
-            exit 1
-          fi
-
+          xcrun simctl get_app_container "$DEVICE_ID" "com.mindera.alfie.debug" > /dev/null 2>&1 || exit 1
 
       - name: Setup Android app
         if: github.event.inputs.platform == 'android'
         run: |
-          # Set environment variables
           export ANDROID_AVD_HOME=$HOME/.android/avd
           export ANDROID_SDK_HOME=$HOME/.android
-          
-          # Create directories
           mkdir -p $ANDROID_AVD_HOME
           mkdir -p $ANDROID_SDK_HOME
-          
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
-          
-          # Install a known working system image
-          sdkmanager --install "system-images;android-30;google_apis;armeabi-v7a"
-          
-          # Create AVD
-          echo "no" | avdmanager --verbose create avd --force \
-            --name "test" \
-            --package "system-images;android-30;google_apis;armeabi-v7a" \
-            --device "pixel_2"
-          
-          # Configure emulator settings
+          sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          echo "no" | avdmanager --verbose create avd --force --name "test" --package "system-images;android-30;google_apis;x86_64" --device "pixel_2"
           echo "hw.cpu.ncore=2" >> $ANDROID_AVD_HOME/test.avd/config.ini
           echo "hw.ramSize=2048" >> $ANDROID_AVD_HOME/test.avd/config.ini
           echo "hw.lcd.density=420" >> $ANDROID_AVD_HOME/test.avd/config.ini
           echo "hw.lcd.height=1920" >> $ANDROID_AVD_HOME/test.avd/config.ini
           echo "hw.lcd.width=1080" >> $ANDROID_AVD_HOME/test.avd/config.ini
-          
-          # Verify AVD creation
-          echo "AVD contents:"
-          ls -la $ANDROID_AVD_HOME/test.avd/
-          
-          # Start emulator
-          $ANDROID_HOME/emulator/emulator \
-            -avd test \
-            -no-audio \
-            -no-boot-anim \
-            -no-window \
-            -gpu swiftshader_indirect \
-            -no-snapshot \
-            -memory 2048 \
-            -skin 1080x1920 \
-            -cores 2 \
-            -no-accel &
-          
-          # Wait for device
-          echo "Waiting for emulator to start..."
+          $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-boot-anim -no-window -gpu swiftshader_indirect -no-snapshot -memory 2048 -skin 1080x1920 -cores 2 -no-accel &
           max_attempts=60
           attempt=0
-          
           while [ $attempt -lt $max_attempts ]; do
-            if adb shell getprop sys.boot_completed 2>&1 | grep -q "1"; then
-              echo "✅ Emulator is ready"
-              break
-            fi
-            echo "Attempt $((attempt+1))/$max_attempts: Waiting for emulator..."
+            if adb shell getprop sys.boot_completed 2>&1 | grep -q "1"; then break; fi
             attempt=$((attempt+1))
             sleep 5
           done
-          
-          # Verify emulator
-          if ! adb devices | grep -q "emulator"; then
-            echo "❌ Emulator failed to start after $max_attempts attempts"
-            echo "ADB devices output:"
-            adb devices
-            echo "AVD list:"
-            avdmanager list avd
-            echo "AVD config:"
-            cat "$ANDROID_AVD_HOME/test.avd/config.ini" || true
-            exit 1
-          fi
-          
-          # Install app
-          echo "Installing app..."
-          adb install artifacts/Alfie.apk || {
-            echo "❌ Failed to install app"
-            exit 1
-          }
+          adb devices | grep -q "emulator" || exit 1
+          adb install artifacts/Alfie.apk || exit 1
 
       - name: Give permission to run script
         run: chmod +x scripts/run-tests.sh
 
-      - name: Run Maestro tests
-        env:
-          MAESTRO_CLI_NO_ANALYTICS: "true"
-          MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: "true"
-        run: |
-          mkdir -p reports
-          ./scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }}
+      - name: Run Maestro Tests
+        run: scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }}
 
       - name: Collect test artifacts
         if: always()
         run: |
-          # Create directory for all test artifacts
           mkdir -p test-artifacts
-          
-          # Copy reports
           cp -r reports/* test-artifacts/ || true
-          
-          # Copy Maestro screenshots (if any tests failed)
           cp -r ~/.maestro/tests/* test-artifacts/screenshots/ || true
 
       - name: Upload test results
