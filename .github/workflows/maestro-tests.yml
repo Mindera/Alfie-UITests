@@ -156,6 +156,14 @@ jobs:
       - name: Setup Android app
         if: github.event.inputs.platform == 'android'
         run: |
+          # Set environment variables
+          export ANDROID_AVD_HOME=$HOME/.android/avd
+          export ANDROID_SDK_HOME=$HOME/.android
+          
+          # Create directories
+          mkdir -p $ANDROID_AVD_HOME
+          mkdir -p $ANDROID_SDK_HOME
+          
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
           
           # Accept licenses first
@@ -170,20 +178,16 @@ jobs:
             --package "system-images;android-30;google_apis;x86_64" \
             --device "pixel_2"
           
-          # Verify AVD was created
-          avdmanager list avd
-          
-          # Get AVD path
-          AVD_PATH=$(avdmanager list avd | grep "Path:" | cut -d':' -f2 | tr -d ' ')
-          echo "AVD path: $AVD_PATH"
-          
           # Configure emulator settings
-          mkdir -p "$AVD_PATH"
-          echo "hw.cpu.ncore=2" >> "$AVD_PATH/config.ini"
-          echo "hw.ramSize=2048" >> "$AVD_PATH/config.ini"
-          echo "hw.lcd.density=420" >> "$AVD_PATH/config.ini"
-          echo "hw.lcd.height=1920" >> "$AVD_PATH/config.ini"
-          echo "hw.lcd.width=1080" >> "$AVD_PATH/config.ini"
+          echo "hw.cpu.ncore=2" >> $ANDROID_AVD_HOME/test.avd/config.ini
+          echo "hw.ramSize=2048" >> $ANDROID_AVD_HOME/test.avd/config.ini
+          echo "hw.lcd.density=420" >> $ANDROID_AVD_HOME/test.avd/config.ini
+          echo "hw.lcd.height=1920" >> $ANDROID_AVD_HOME/test.avd/config.ini
+          echo "hw.lcd.width=1080" >> $ANDROID_AVD_HOME/test.avd/config.ini
+          
+          # Verify AVD creation
+          echo "AVD contents:"
+          ls -la $ANDROID_AVD_HOME/test.avd/
           
           # Start emulator
           $ANDROID_HOME/emulator/emulator \
@@ -220,7 +224,7 @@ jobs:
             echo "AVD list:"
             avdmanager list avd
             echo "AVD config:"
-            cat "$AVD_PATH/config.ini" || true
+            cat "$ANDROID_AVD_HOME/test.avd/config.ini" || true
             exit 1
           fi
           
