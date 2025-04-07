@@ -65,23 +65,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
+      - name: Setup Android Emulator
         if: github.event.inputs.platform == 'android'
-        uses: android-actions/setup-android@v3
-
-      - name: Configure Android SDK
-        if: github.event.inputs.platform == 'android'
-        run: |
-          export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
-          adb --version || exit 1
-
-      - name: Create required directories
-        run: |
-          mkdir -p artifacts
-          mkdir -p reports
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: |
+            adb install artifacts/Alfie.apk
+            # Run your tests here
+            scripts/run-tests.sh android ${{ github.event.inputs.test_tag }}
 
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
@@ -97,40 +93,8 @@ jobs:
           xcrun simctl install "$DEVICE_ID" "Alfie.app"
           xcrun simctl get_app_container "$DEVICE_ID" "com.mindera.alfie.debug" > /dev/null 2>&1 || exit 1
 
-      - name: Setup Android app
-        if: github.event.inputs.platform == 'android'
-        run: |
-          export ANDROID_AVD_HOME=$HOME/.android/avd
-          export ANDROID_SDK_HOME=$HOME/.android
-          mkdir -p $ANDROID_AVD_HOME
-          mkdir -p $ANDROID_SDK_HOME
-          curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
-          # List available system images
-          sdkmanager --list | grep system-images
-          # Install a known working system image
-          sdkmanager --install "system-images;android-29;default;armeabi-v7a"
-          echo "no" | avdmanager --verbose create avd --force --name "test" --package "system-images;android-29;default;armeabi-v7a" --device "pixel_2"
-          echo "hw.cpu.ncore=2" >> $ANDROID_AVD_HOME/test.avd/config.ini
-          echo "hw.ramSize=2048" >> $ANDROID_AVD_HOME/test.avd/config.ini
-          echo "hw.lcd.density=420" >> $ANDROID_AVD_HOME/test.avd/config.ini
-          echo "hw.lcd.height=1920" >> $ANDROID_AVD_HOME/test.avd/config.ini
-          echo "hw.lcd.width=1080" >> $ANDROID_AVD_HOME/test.avd/config.ini
-          $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-boot-anim -no-window -gpu swiftshader_indirect -no-snapshot -memory 2048 -skin 1080x1920 -cores 2 -no-accel &
-          max_attempts=60
-          attempt=0
-          while [ $attempt -lt $max_attempts ]; do
-            if adb shell getprop sys.boot_completed 2>&1 | grep -q "1"; then break; fi
-            attempt=$((attempt+1))
-            sleep 5
-          done
-          adb devices | grep -q "emulator" || exit 1
-          adb install artifacts/Alfie.apk || exit 1
-
       - name: Give permission to run script
         run: chmod +x scripts/run-tests.sh
-
-      - name: Run Maestro Tests
-        run: scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }}
 
       - name: Collect test artifacts
         if: always()
