@@ -167,12 +167,12 @@ jobs:
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
           
           # Install a known working system image
-          sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          sdkmanager --install "system-images;android-30;google_apis;armeabi-v7a"
           
           # Create AVD
           echo "no" | avdmanager --verbose create avd --force \
             --name "test" \
-            --package "system-images;android-30;google_apis;x86_64" \
+            --package "system-images;android-30;google_apis;armeabi-v7a" \
             --device "pixel_2"
           
           # Configure emulator settings
@@ -196,7 +196,8 @@ jobs:
             -no-snapshot \
             -memory 2048 \
             -skin 1080x1920 \
-            -cores 2 &
+            -cores 2 \
+            -no-accel &
           
           # Wait for device
           echo "Waiting for emulator to start..."
