@@ -21,7 +21,7 @@ on:
 jobs:
   mobile-test:
     name: Run ${{ github.event.inputs.platform }} UI Tests
-    runs-on: macos-latest
+    runs-on: ${{ github.event.inputs.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
     
     steps:
       - name: Checkout code
@@ -158,11 +158,11 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
           
-          # Use ARM64 image for M1/M2 runners
-          echo "y" | sdkmanager "system-images;android-30;google_apis;arm64-v8a"
-          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;arm64-v8a"
+          # Use x86_64 image for Ubuntu runner
+          echo "y" | sdkmanager "system-images;android-30;google_apis;x86_64"
+          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64"
           
-          # Create and configure AVD directory
+          # Configure emulator settings
           mkdir -p ~/.android/avd/test.avd/
           echo "hw.cpu.ncore=2" >> ~/.android/avd/test.avd/config.ini
           echo "hw.ramSize=2048" >> ~/.android/avd/test.avd/config.ini
@@ -170,7 +170,7 @@ jobs:
           echo "hw.lcd.height=1920" >> ~/.android/avd/test.avd/config.ini
           echo "hw.lcd.width=1080" >> ~/.android/avd/test.avd/config.ini
           
-          # Start emulator with specific configurations for CI/ARM
+          # Start emulator
           $ANDROID_HOME/emulator/emulator \
             -avd test \
             -no-audio \
@@ -178,17 +178,11 @@ jobs:
             -no-window \
             -gpu swiftshader \
             -no-snapshot \
-            -no-accel \
             -memory 2048 \
-            -no-snapshot-save \
-            -camera-back none \
-            -camera-front none \
             -skin 1080x1920 \
-            -cores 2 \
-            -feature -Vulkan \
-            -feature -HardwareKeyboard &
+            -cores 2 &
             
-          # Wait for device with better error handling and logging
+          # Wait for device
           echo "Waiting for emulator to start..."
           max_attempts=60
           attempt=0
@@ -203,16 +197,15 @@ jobs:
             sleep 5
           done
           
-          # Final verification
+          # Verify emulator
           if ! adb devices | grep -q "emulator"; then
             echo "❌ Emulator failed to start after $max_attempts attempts"
             echo "ADB devices output:"
             adb devices
-            echo "Emulator log:"
-            cat ~/.android/avd/test.avd/config.ini
             exit 1
           fi
           
+          # Install app
           echo "Installing app..."
           adb install artifacts/Alfie.apk || {
             echo "❌ Failed to install app"
