@@ -158,12 +158,22 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
           
-          # Use x86_64 image for Ubuntu runner
-          echo "y" | sdkmanager "system-images;android-30;google_apis;x86_64"
-          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64"
+          # Accept licenses first
+          yes | sdkmanager --licenses
+          
+          # Install system image
+          sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          
+          # Create AVD
+          echo "no" | avdmanager --verbose create avd --force \
+            --name "test" \
+            --package "system-images;android-30;google_apis;x86_64" \
+            --device "pixel_2"
+          
+          # Verify AVD was created
+          avdmanager list avd
           
           # Configure emulator settings
-          mkdir -p ~/.android/avd/test.avd/
           echo "hw.cpu.ncore=2" >> ~/.android/avd/test.avd/config.ini
           echo "hw.ramSize=2048" >> ~/.android/avd/test.avd/config.ini
           echo "hw.lcd.density=420" >> ~/.android/avd/test.avd/config.ini
@@ -181,7 +191,7 @@ jobs:
             -memory 2048 \
             -skin 1080x1920 \
             -cores 2 &
-            
+          
           # Wait for device
           echo "Waiting for emulator to start..."
           max_attempts=60
@@ -202,6 +212,8 @@ jobs:
             echo "❌ Emulator failed to start after $max_attempts attempts"
             echo "ADB devices output:"
             adb devices
+            echo "AVD list:"
+            avdmanager list avd
             exit 1
           fi
           
