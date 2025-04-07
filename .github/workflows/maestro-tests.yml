@@ -75,6 +75,13 @@ jobs:
           profile: pixel_2
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           script: |
+            echo "Downloading APK..."
+            curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
+            if [ ! -f "artifacts/Alfie.apk" ]; then
+              echo "❌ APK not found after download!"
+              exit 1
+            fi
+            echo "✅ APK downloaded successfully."
             adb install artifacts/Alfie.apk
             # Run your tests here
             scripts/run-tests.sh android ${{ github.event.inputs.test_tag }}
