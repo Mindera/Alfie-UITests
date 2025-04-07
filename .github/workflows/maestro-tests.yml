@@ -75,6 +75,8 @@ jobs:
           profile: pixel_2
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           script: |
+            echo "Creating artifacts directory..."
+            mkdir -p artifacts
             echo "Downloading APK..."
             curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
             if [ ! -f "artifacts/Alfie.apk" ]; then
