@@ -4,11 +4,13 @@ appId: ${APP_ID}
 #    text: randText  # Any random text that does not exist in the UI
 #    optional: true  # This should be true so that the test won't fail
 #    delay: 1000
-- tapOn: "Left"
+- tapOn:
+    id: 'back-btn'
 #    id: ${output.plpScreen.backButton}
 #- tapOn: 
 #    text: randText  # Any random text that does not exist in the UI
 #    optional: true  # This should be true so that the test won't fail
 #    delay: 1000
-- tapOn: "Left"
+- tapOn:
+    id: 'back-btn'
 #    id: ${output.searchScreen.backButton}
