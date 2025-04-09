@@ -9,8 +9,13 @@ tags:
     id: ${output.homeScreen.searchInput}
 - inputText: "shirts"
 - pressKey: Enter
-- runFlow: ../../generics/actions/backAndTapSearch.yaml
 - waitForAnimationToEnd
+- tapOn:
+    id: 'back-btn'
+#- runFlow: ../../generics/actions/backAndTapSearch.yaml
+- waitForAnimationToEnd
+- tapOn:
+    id: 'back-btn'
 - tapOn: 
     id: ${output.homeScreen.searchInput}
 - assertVisible: "shirts"
