@@ -80,13 +80,22 @@ jobs:
             echo "Downloading APK..."
             curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
             
-            # Verificar se o download foi bem sucedido
-            if [ ! -f "artifacts/Alfie.apk" ]; then
+            # Verificar se o APK existe
+            if [ ! -f "artifacts/Alfie.apk" ] 
+            then
               echo "❌ APK not found after download!"
               exit 1
             fi
             
-            echo "✅ APK downloaded successfully."
+            # Verificar tamanho do APK
+            apk_size=$(stat -f%z "artifacts/Alfie.apk" 2>/dev/null || stat -c%s "artifacts/Alfie.apk")
+            if [ "$apk_size" -eq 0 ]
+            then
+              echo "❌ APK file is empty!"
+              exit 1
+            fi
+            
+            echo "✅ APK downloaded successfully (size: $apk_size bytes)"
             
             # Instalar APK e executar testes
             adb install artifacts/Alfie.apk
