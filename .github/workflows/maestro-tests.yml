@@ -73,27 +73,35 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_2
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          emulator-options: >-
+            -no-window
+            -gpu swiftshader_indirect
+            -noaudio
+            -no-boot-anim
+            -no-snapshot
+            -memory 2048
+            -cores 2
           script: |
             # Criar diretório e baixar APK
             mkdir -p artifacts
             echo "Downloading APK..."
             curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
             
-            # Verificar se o APK existe
-            if [ ! -f "artifacts/Alfie.apk" ]; then 
-              echo "❌ APK not found after download!"
-              exit 1
-            fi
-            
-            # Verificar tamanho do APK usando ls em vez de stat
-            apk_size=$(ls -l artifacts/Alfie.apk | awk '{print $5}')
-            if [ -z "$apk_size" ] || [ "$apk_size" -eq 0 ]; then 
-              echo "❌ APK file is empty!"
-              exit 1
-            fi
-            
-            echo "✅ APK downloaded successfully (size: $apk_size bytes)"
+            # Verificar APK em um único comando
+            sh -c '
+              if [ ! -f "artifacts/Alfie.apk" ]; then
+                echo "❌ APK not found after download!"
+                exit 1
+              fi
+              
+              apk_size=$(ls -l artifacts/Alfie.apk | awk "{print \$5}")
+              if [ -z "$apk_size" ] || [ "$apk_size" -eq 0 ]; then
+                echo "❌ APK file is empty!"
+                exit 1
+              fi
+              
+              echo "✅ APK downloaded successfully (size: $apk_size bytes)"
+            '
             
             # Instalar APK e executar testes
             adb install artifacts/Alfie.apk
