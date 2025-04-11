@@ -73,19 +73,23 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_2
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           script: |
-            echo "Creating artifacts directory..."
+            # Criar diretório e baixar APK
             mkdir -p artifacts
             echo "Downloading APK..."
             curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
+            
+            # Verificar se o download foi bem sucedido
             if [ ! -f "artifacts/Alfie.apk" ]; then
               echo "❌ APK not found after download!"
               exit 1
             fi
+            
             echo "✅ APK downloaded successfully."
+            
+            # Instalar APK e executar testes
             adb install artifacts/Alfie.apk
-            # Run your tests here
             scripts/run-tests.sh android ${{ github.event.inputs.test_tag }}
 
       - name: Setup iOS app
