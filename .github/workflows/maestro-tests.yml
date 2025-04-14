@@ -82,18 +82,18 @@ jobs:
             -memory 2048
             -cores 2
           script: |
-            # Criar diretório e baixar APK
+            # Criar script para download e verificação do APK
+            cat > download_apk.sh << 'EOF'
+            #!/bin/bash
             mkdir -p artifacts
             echo "Downloading APK..."
-            curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
+            curl -L "$1" -o artifacts/Alfie.apk
             
-            # Verificar se o APK existe
             if [ ! -f artifacts/Alfie.apk ]; then
               echo "❌ APK not found after download!"
               exit 1
             fi
             
-            # Verificar tamanho do APK
             APK_SIZE=$(ls -l artifacts/Alfie.apk | awk '{print $5}')
             if [ -z "$APK_SIZE" ] || [ "$APK_SIZE" -eq 0 ]; then
               echo "❌ APK file is empty!"
@@ -101,6 +101,13 @@ jobs:
             fi
             
             echo "✅ APK downloaded successfully (size: $APK_SIZE bytes)"
+            EOF
+            
+            # Tornar o script executável
+            chmod +x download_apk.sh
+            
+            # Executar o script
+            ./download_apk.sh "${{ github.event.inputs.app_url }}"
             
             # Instalar APK e executar testes
             adb install artifacts/Alfie.apk
