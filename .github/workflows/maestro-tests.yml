@@ -88,20 +88,20 @@ jobs:
             curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
             
             # Verificar APK em um único comando
-            sh -c '
-              if [ ! -f "artifacts/Alfie.apk" ]; then
-                echo "❌ APK not found after download!"
+            /bin/bash -c "
+              if [ ! -f 'artifacts/Alfie.apk' ]; then
+                echo '❌ APK not found after download!'
                 exit 1
               fi
               
-              apk_size=$(ls -l artifacts/Alfie.apk | awk "{print \$5}")
-              if [ -z "$apk_size" ] || [ "$apk_size" -eq 0 ]; then
-                echo "❌ APK file is empty!"
+              apk_size=\$(ls -l artifacts/Alfie.apk | awk '{print \$5}')
+              if [ -z \"\$apk_size\" ] || [ \"\$apk_size\" -eq 0 ]; then
+                echo '❌ APK file is empty!'
                 exit 1
               fi
               
-              echo "✅ APK downloaded successfully (size: $apk_size bytes)"
-            '
+              echo '✅ APK downloaded successfully (size: '\$apk_size' bytes)'
+            "
             
             # Instalar APK e executar testes
             adb install artifacts/Alfie.apk
