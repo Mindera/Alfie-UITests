@@ -82,24 +82,45 @@ jobs:
             -memory 2048
             -cores 2
           script: |
+            # Criar script para download e verificação do APK
+            cat > download_and_test.sh << 'EOF'
+            #!/bin/bash
+            set -e
+            
             # Criar diretório e verificar ambiente
             mkdir -p artifacts
             echo "Current directory: $(pwd)"
             
-            # Download do APK - tudo em um único comando
-            echo "Downloading APK from ${{ github.event.inputs.app_url }}"
-            curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk && \
-            echo "Listing files in artifacts directory:" && \
-            ls -la artifacts/ && \
-            APK_SIZE=$(ls -l artifacts/Alfie.apk | awk '{print $5}') && \
-            echo "APK size: $APK_SIZE bytes" && \
-            if [ "$APK_SIZE" -lt 1000000 ]; then \
-              echo "❌ APK file is too small, likely invalid. Size: $APK_SIZE bytes"; \
-              exit 1; \
-            fi && \
-            echo "✅ APK downloaded successfully" && \
-            adb install artifacts/Alfie.apk && \
-            scripts/run-tests.sh android ${{ github.event.inputs.test_tag }}
+            # Download do APK
+            echo "Downloading APK from $1"
+            curl -L "$1" -o artifacts/Alfie.apk
+            
+            # Listar arquivos para debug
+            echo "Listing files in artifacts directory:"
+            ls -la artifacts/
+            
+            # Verificar tamanho do APK
+            APK_SIZE=$(ls -l artifacts/Alfie.apk | awk '{print $5}')
+            echo "APK size: $APK_SIZE bytes"
+            
+            # Verificar se o APK é válido
+            if [ "$APK_SIZE" -lt 1000000 ]; then
+              echo "❌ APK file is too small, likely invalid. Size: $APK_SIZE bytes"
+              exit 1
+            fi
+            
+            echo "✅ APK downloaded successfully"
+            
+            # Instalar APK e executar testes
+            adb install artifacts/Alfie.apk
+            scripts/run-tests.sh android $2
+            EOF
+            
+            # Tornar o script executável
+            chmod +x download_and_test.sh
+            
+            # Executar o script
+            ./download_and_test.sh "${{ github.event.inputs.app_url }}" "${{ github.event.inputs.test_tag }}"
 
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
