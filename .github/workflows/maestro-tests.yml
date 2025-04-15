@@ -82,23 +82,33 @@ jobs:
             -memory 2048
             -cores 2
           script: |
-            # Download APK diretamente
+            # Criar diretório
             mkdir -p artifacts
+            
+            # Verificar diretório de trabalho atual
+            echo "Current directory: $(pwd)"
+            
+            # Download do APK
             echo "Downloading APK from ${{ github.event.inputs.app_url }}"
             curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
             
-            # Verificar se o APK existe (tudo em uma linha)
-            [ ! -f artifacts/Alfie.apk ] && { echo "❌ APK not found after download!"; exit 1; }
+            # Listar arquivos para debug
+            echo "Listing files in artifacts directory:"
+            ls -la artifacts/
             
-            # Verificar tamanho do APK (tudo em uma linha)
-            APK_SIZE=$(ls -l artifacts/Alfie.apk | awk '{print $5}')
-            echo "APK size: $APK_SIZE bytes"
-            
-            # Instalar APK
-            adb install artifacts/Alfie.apk
-            
-            # Executar testes
-            scripts/run-tests.sh android ${{ github.event.inputs.test_tag }}
+            # Verificar diretamente com o resultado do download
+            if [ $? -eq 0 ] && [ -f artifacts/Alfie.apk ]; then
+              echo "✅ APK downloaded successfully"
+              APK_SIZE=$(ls -l artifacts/Alfie.apk | awk '{print $5}')
+              echo "APK size: $APK_SIZE bytes"
+              
+              # Instalar APK e executar testes
+              adb install artifacts/Alfie.apk
+              scripts/run-tests.sh android ${{ github.event.inputs.test_tag }}
+            else
+              echo "❌ APK download failed"
+              exit 1
+            fi
 
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
