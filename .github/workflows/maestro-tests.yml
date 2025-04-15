@@ -82,33 +82,24 @@ jobs:
             -memory 2048
             -cores 2
           script: |
-            # Criar diretório
+            # Criar diretório e verificar ambiente
             mkdir -p artifacts
-            
-            # Verificar diretório de trabalho atual
             echo "Current directory: $(pwd)"
             
-            # Download do APK
+            # Download do APK - tudo em um único comando
             echo "Downloading APK from ${{ github.event.inputs.app_url }}"
-            curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
-            
-            # Listar arquivos para debug
-            echo "Listing files in artifacts directory:"
-            ls -la artifacts/
-            
-            # Verificar diretamente com o resultado do download
-            if [ $? -eq 0 ] && [ -f artifacts/Alfie.apk ]; then
-              echo "✅ APK downloaded successfully"
-              APK_SIZE=$(ls -l artifacts/Alfie.apk | awk '{print $5}')
-              echo "APK size: $APK_SIZE bytes"
-              
-              # Instalar APK e executar testes
-              adb install artifacts/Alfie.apk
-              scripts/run-tests.sh android ${{ github.event.inputs.test_tag }}
-            else
-              echo "❌ APK download failed"
-              exit 1
-            fi
+            curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk && \
+            echo "Listing files in artifacts directory:" && \
+            ls -la artifacts/ && \
+            APK_SIZE=$(ls -l artifacts/Alfie.apk | awk '{print $5}') && \
+            echo "APK size: $APK_SIZE bytes" && \
+            if [ "$APK_SIZE" -lt 1000000 ]; then \
+              echo "❌ APK file is too small, likely invalid. Size: $APK_SIZE bytes"; \
+              exit 1; \
+            fi && \
+            echo "✅ APK downloaded successfully" && \
+            adb install artifacts/Alfie.apk && \
+            scripts/run-tests.sh android ${{ github.event.inputs.test_tag }}
 
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
