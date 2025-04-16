@@ -101,24 +101,29 @@ jobs:
             
             # Primeira tentativa de instalar o APK
             echo "Tentativa 1 de instalar o APK"
-            adb install -r artifacts/Alfie.apk || {
+            adb install -r artifacts/Alfie.apk
+            
+            # Se falhar, tenta novamente
+            if [ $? -ne 0 ]; then
               echo "Falha na primeira tentativa, aguardando 10 segundos..."
               sleep 10
-              
-              # Segunda tentativa
               echo "Tentativa 2 de instalar o APK"
-              adb install -r artifacts/Alfie.apk || {
-                echo "Falha na segunda tentativa, aguardando 10 segundos..."
-                sleep 10
-                
-                # Terceira tentativa
-                echo "Tentativa 3 de instalar o APK"
-                adb install -r artifacts/Alfie.apk || {
-                  echo "❌ Falha ao instalar o APK após 3 tentativas"
-                  exit 1
-                }
-              }
-            }
+              adb install -r artifacts/Alfie.apk
+            fi
+            
+            # Se ainda falhar, tenta uma última vez
+            if [ $? -ne 0 ]; then
+              echo "Falha na segunda tentativa, aguardando 10 segundos..."
+              sleep 10
+              echo "Tentativa 3 de instalar o APK"
+              adb install -r artifacts/Alfie.apk
+            fi
+            
+            # Verifica se a última tentativa falhou
+            if [ $? -ne 0 ]; then
+              echo "❌ Falha ao instalar o APK após 3 tentativas"
+              exit 1
+            fi
             
             echo "✅ APK instalado com sucesso!"
             
