@@ -92,8 +92,30 @@ jobs:
             # Verificar se o download foi bem-sucedido
             ls -la artifacts/
             
-            # Instalar APK
-            adb install artifacts/Alfie.apk
+            # Aguardar o emulador estabilizar
+            echo "Aguardando o emulador estabilizar..."
+            sleep 30
+            
+            # Verificar estado do emulador
+            adb devices
+            
+            # Tentar instalar o APK com retry
+            echo "Instalando APK..."
+            for i in 1 2 3; do
+              echo "Tentativa $i de instalar o APK"
+              if adb install -r artifacts/Alfie.apk; then
+                echo "✅ APK instalado com sucesso!"
+                break
+              else
+                echo "❌ Falha ao instalar o APK, tentando novamente em 10 segundos..."
+                sleep 10
+              fi
+              
+              if [ $i -eq 3 ]; then
+                echo "❌ Falha ao instalar o APK após 3 tentativas"
+                exit 1
+              fi
+            done
             
             # Verificar se o arquivo androidElements.yaml existe
             if [ -f "screens/android/androidElements.yaml" ]; then
