@@ -6,7 +6,7 @@ appId: ${APP_ID}
     when:
         platform: "Android"
     commands:
-        - runFlow: ../../screens/Android/androidElements.yaml
+        - runFlow: ../../screens/android/androidElements.yaml
 - runFlow:
     when:
         platform: "iOS"
