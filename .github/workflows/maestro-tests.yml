@@ -99,41 +99,10 @@ jobs:
             # Verificar estado do emulador
             adb devices
             
-            # Primeira tentativa de instalar o APK
-            echo "Tentativa 1 de instalar o APK"
+            # Tentar instalar o APK (com retry automático)
+            echo "Instalando APK..."
             adb install -r artifacts/Alfie.apk
-            
-            # Se falhar, tenta novamente
-            if [ $? -ne 0 ]; then
-              echo "Falha na primeira tentativa, aguardando 10 segundos..."
-              sleep 10
-              echo "Tentativa 2 de instalar o APK"
-              adb install -r artifacts/Alfie.apk
-            fi
-            
-            # Se ainda falhar, tenta uma última vez
-            if [ $? -ne 0 ]; then
-              echo "Falha na segunda tentativa, aguardando 10 segundos..."
-              sleep 10
-              echo "Tentativa 3 de instalar o APK"
-              adb install -r artifacts/Alfie.apk
-            fi
-            
-            # Verifica se a última tentativa falhou
-            if [ $? -ne 0 ]; then
-              echo "❌ Falha ao instalar o APK após 3 tentativas"
-              exit 1
-            fi
-            
             echo "✅ APK instalado com sucesso!"
-            
-            # Verificar se o arquivo androidElements.yaml existe
-            if [ -f "screens/android/androidElements.yaml" ]; then
-              echo "✅ Android elements file found"
-            else
-              echo "❌ Android elements file not found!"
-              exit 1
-            fi
             
             # Executar testes
             scripts/run-tests.sh android ${{ github.event.inputs.test_tag }}
