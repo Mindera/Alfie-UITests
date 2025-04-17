@@ -11,7 +11,7 @@ appId: ${APP_ID}
     when:
         platform: "iOS"
     commands:
-        - runFlow: ../../screens/iOS/iOSElements.yaml
+        - runFlow: ../../screens/ios/iOSElements.yaml
 - launchApp:
     clearState: true
     clearKeychain: true
