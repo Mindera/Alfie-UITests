@@ -79,11 +79,12 @@ jobs:
             -noaudio
             -no-boot-anim
             -no-snapshot
-            -memory 2048
+            -memory 3072
             -cores 2
           script: |
             # Criar diretório
             mkdir -p artifacts
+            mkdir -p reports
             
             # Download do APK
             echo "Downloading APK from ${{ github.event.inputs.app_url }}"
@@ -94,18 +95,18 @@ jobs:
             
             # Aguardar o emulador estabilizar
             echo "Aguardando o emulador estabilizar..."
-            sleep 30
+            sleep 60
             
             # Verificar estado do emulador
             adb devices
             
-            # Tentar instalar o APK (com retry automático)
+            # Tentar instalar o APK
             echo "Instalando APK..."
             adb install -r artifacts/Alfie.apk
             echo "✅ APK instalado com sucesso!"
             
-            # Executar testes
-            scripts/run-tests.sh android ${{ github.event.inputs.test_tag }}
+            # Executar apenas um teste por vez para reduzir a carga no emulador
+            scripts/run-tests.sh android ${{ github.event.inputs.test_tag }} --concurrency=1
 
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'

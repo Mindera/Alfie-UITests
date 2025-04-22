@@ -175,4 +175,4 @@ timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
 report_file="reports/${timestamp}-report.html"
 
 # Run tests with explicit output path
-maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file"
+maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file" ${@:3}
