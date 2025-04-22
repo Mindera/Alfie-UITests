@@ -105,8 +105,16 @@ jobs:
             adb install -r artifacts/Alfie.apk
             echo "✅ APK instalado com sucesso!"
             
-            # Executar apenas um teste por vez para reduzir a carga no emulador
-            scripts/run-tests.sh android ${{ github.event.inputs.test_tag }} --concurrency=1
+            # Executar apenas um teste específico para diagnóstico
+            echo "Executando teste básico para diagnóstico..."
+            export MAESTRO_DRIVER_STARTUP_TIMEOUT=60000
+            export MAESTRO_DRIVER_INSTALL_TIMEOUT=60000
+            
+            # Verificar os IDs dos elementos na interface
+            adb shell dumpsys window windows | grep -E 'mCurrentFocus|mFocusedApp'
+            
+            # Executar apenas um teste específico
+            maestro test tests/searchTests/specialCharsSearchTest.yaml --format=html --output="reports/test-report.html"
 
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
