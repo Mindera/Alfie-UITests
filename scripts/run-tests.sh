@@ -138,7 +138,7 @@ elif [ "$platform" = "android" ]; then
     APK_PATH="$ARTIFACTS_PATH/Alfie.apk"
     
     # Check Android device
-    check_android_device
+#    check_android_device
     
     # Check if APK exists
     if [ ! -f "$APK_PATH" ]; then
