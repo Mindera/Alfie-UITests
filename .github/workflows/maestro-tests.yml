@@ -105,8 +105,8 @@ jobs:
             adb install -r artifacts/Alfie.apk
             echo "✅ APK instalado com sucesso!"
             
-            # Executar apenas um teste específico para diagnóstico
-            echo "Executando teste básico para diagnóstico..."
+            # Configurar variáveis de ambiente para o Maestro
+            echo "Configurando variáveis de ambiente para o Maestro..."
             export MAESTRO_DRIVER_STARTUP_TIMEOUT=60000
             export MAESTRO_DRIVER_INSTALL_TIMEOUT=60000
             export MAESTRO_STUDIO_DEBUG=true
@@ -122,9 +122,13 @@ jobs:
             # Aguardar o aplicativo iniciar
             sleep 10
             
-            # Executar apenas um teste específico com mais logs
+            # Executar apenas um teste específico com debug output
             echo "Executando teste Maestro:"
-            maestro test -v tests/searchTests/specialCharsSearchTest.yaml --format=html --output="reports/test-report.html"
+            maestro test tests/searchTests/specialCharsSearchTest.yaml --debug-output=reports/debug --flatten-debug-output --format=html --output="reports/test-report.html"
+            
+            # Verificar os logs do aplicativo para diagnóstico
+            echo "Logs do aplicativo:"
+            adb logcat -d | grep -i alfie
 
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
