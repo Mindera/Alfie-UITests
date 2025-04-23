@@ -1,16 +1,27 @@
 #!/bin/bash
 
-# Check if required arguments were provided
+# Verificar argumentos
 if [ $# -lt 2 ]; then
-    echo "How to Run: ./run-tests.sh <platform> <tag>"
-    echo "Example: ./run-tests.sh ios searchTests"
-    echo "Available tags:"
-    echo "  - searchTests : Search functionality tests"
+    echo "❌ Uso: $0 <platform> <tag> [options]"
+    echo "   platform: ios ou android"
+    echo "   tag: tag dos testes a serem executados (ex: searchTests)"
+    echo "   options: opções adicionais"
+    echo "      --skip-device-check: pula a verificação do dispositivo (útil quando o emulador já está em execução)"
     exit 1
 fi
 
 platform=$1
 tag=$2
+skip_device_check=false
+
+# Verificar opções adicionais
+for arg in "${@:3}"; do
+    case $arg in
+        --skip-device-check)
+            skip_device_check=true
+            ;;
+    esac
+done
 
 # Function to check iOS device
 check_ios_simulator() {
@@ -137,8 +148,12 @@ elif [ "$platform" = "android" ]; then
     APP_ID="au.com.alfie.ecomm.debug"
     APK_PATH="$ARTIFACTS_PATH/Alfie.apk"
     
-    # Check Android device
-#    check_android_device
+    # Check Android device only if not skipped
+    if [ "$skip_device_check" = false ]; then
+        check_android_device
+    else
+        echo "✅ Pulando verificação do dispositivo Android (--skip-device-check)"
+    fi
     
     # Check if APK exists
     if [ ! -f "$APK_PATH" ]; then

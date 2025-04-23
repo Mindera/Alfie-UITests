@@ -105,30 +105,10 @@ jobs:
             adb install -r artifacts/Alfie.apk
             echo "✅ APK instalado com sucesso!"
             
-            # Configurar variáveis de ambiente para o Maestro
-            echo "Configurando variáveis de ambiente para o Maestro..."
-            export MAESTRO_DRIVER_STARTUP_TIMEOUT=60000
-            export MAESTRO_DRIVER_INSTALL_TIMEOUT=60000
-            export MAESTRO_STUDIO_DEBUG=true
-            
-            # Verificar pacotes instalados
-            echo "Verificando pacotes instalados:"
-            adb shell pm list packages | grep alfie
-            
-            # Iniciar o aplicativo manualmente
-            echo "Iniciando o aplicativo manualmente:"
-            adb shell monkey -p au.com.alfie.ecomm.debug -c android.intent.category.LAUNCHER 1
-            
-            # Aguardar o aplicativo iniciar
-            sleep 10
-            
-            # Executar apenas um teste específico com debug output
-            echo "Executando teste Maestro:"
-            maestro test tests/searchTests/specialCharsSearchTest.yaml --debug-output=reports/debug --flatten-debug-output --format=html --output="reports/test-report.html"
-            
-            # Verificar os logs do aplicativo para diagnóstico
-            echo "Logs do aplicativo:"
-            adb logcat -d | grep -i alfie
+            # Executar os testes usando o script run-tests.sh
+            # Passando o parâmetro --skip-device-check para evitar que o script tente inicializar o emulador novamente
+            echo "Executando testes via script..."
+            ./scripts/run-tests.sh android ${{ github.event.inputs.test_tag }} --skip-device-check
 
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
