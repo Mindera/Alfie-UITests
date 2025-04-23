@@ -109,12 +109,22 @@ jobs:
             echo "Executando teste básico para diagnóstico..."
             export MAESTRO_DRIVER_STARTUP_TIMEOUT=60000
             export MAESTRO_DRIVER_INSTALL_TIMEOUT=60000
+            export MAESTRO_STUDIO_DEBUG=true
             
-            # Verificar os IDs dos elementos na interface
-            adb shell dumpsys window windows | grep -E 'mCurrentFocus|mFocusedApp'
+            # Verificar pacotes instalados
+            echo "Verificando pacotes instalados:"
+            adb shell pm list packages | grep alfie
             
-            # Executar apenas um teste específico
-            maestro test tests/searchTests/specialCharsSearchTest.yaml --format=html --output="reports/test-report.html"
+            # Iniciar o aplicativo manualmente
+            echo "Iniciando o aplicativo manualmente:"
+            adb shell monkey -p au.com.alfie.ecomm.debug -c android.intent.category.LAUNCHER 1
+            
+            # Aguardar o aplicativo iniciar
+            sleep 10
+            
+            # Executar apenas um teste específico com mais logs
+            echo "Executando teste Maestro:"
+            maestro test -v tests/searchTests/specialCharsSearchTest.yaml --format=html --output="reports/test-report.html"
 
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
