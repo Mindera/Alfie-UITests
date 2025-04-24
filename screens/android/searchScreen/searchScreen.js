@@ -1,8 +1,18 @@
 // searchScreen.js
 output.searchScreen = {
-    textToSearch: 'search-input|searchInput|search_input|searchbox|search-box',
-    backButton: 'back-btn|backBtn|back_btn|back-button|backButton',
-    magnifier: 'magnifyingglass|search-icon|searchIcon',	
+    textToSearch: {
+        id: 'search-input|searchInput|search_input|searchbox|search-box',
+        text: 'Search|Buscar|Pesquisar',
+        class: 'android.widget.EditText'
+    },
+    backButton: {
+        id: 'back-btn|backBtn|back_btn|back-button|backButton',
+        class: 'android.widget.ImageButton'
+    },
+    magnifier: {
+        id: 'magnifyingglass|search-icon|searchIcon',
+        class: 'android.widget.ImageView'
+    },
     closeButton: 'close-btn|closeBtn|close_btn|close-button|closeButton',
     recenteSearchTitle: 'recent-search-title|recentSearchTitle',
     clearRecentSearches: 'clear|clearAll|clear-all|clearHistory',

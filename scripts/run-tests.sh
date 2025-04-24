@@ -174,7 +174,27 @@ elif [ "$platform" = "android" ]; then
     else
         echo "✅ Android app already installed"
     fi
-
+#####
+    # Iniciar o aplicativo antes de executar os testes
+    echo "📱 Iniciando o aplicativo para verificar a estrutura da UI..."
+    adb shell monkey -p "$APP_ID" -c android.intent.category.LAUNCHER 1
+    sleep 5
+    
+    # Capturar a hierarquia de visualização para diagnóstico
+    echo "🔍 Capturando hierarquia de visualização para diagnóstico..."
+    mkdir -p reports/ui-dump
+    adb shell uiautomator dump /sdcard/window_dump.xml
+    adb pull /sdcard/window_dump.xml reports/ui-dump/
+    
+    # Procurar por elementos de pesquisa na hierarquia
+    echo "🔍 Procurando elementos de pesquisa na hierarquia..."
+    grep -i "search\|input\|edit" reports/ui-dump/window_dump.xml > reports/ui-dump/search_elements.txt
+    
+    # Configurar variáveis de ambiente para o Maestro
+    export MAESTRO_DRIVER_STARTUP_TIMEOUT=120000
+    export MAESTRO_DRIVER_INSTALL_TIMEOUT=120000
+    export MAESTRO_STUDIO_DEBUG=true
+#####
 else
     echo "❌ Invalid platform. Use 'ios' or 'android'"
     exit 1
@@ -189,5 +209,10 @@ echo "🆔 App ID: $APP_ID"
 timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
 report_file="reports/${timestamp}-report.html"
 
+#####
 # Run tests with explicit output path
-maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file"
+# maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file"
+#####
+# Run tests with explicit output path and additional options
+maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file" --debug-output=reports/debug --flatten-debug-output
+#####

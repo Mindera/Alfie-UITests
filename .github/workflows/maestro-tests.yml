@@ -79,7 +79,7 @@ jobs:
             -noaudio
             -no-boot-anim
             -no-snapshot
-            -memory 3072
+            -memory 4096
             -cores 2
           script: |
             # Criar diretório
@@ -95,7 +95,7 @@ jobs:
             
             # Aguardar o emulador estabilizar
             echo "Aguardando o emulador estabilizar..."
-            sleep 60
+            sleep 90
             
             # Verificar estado do emulador
             adb devices
