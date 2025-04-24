@@ -1,27 +1,16 @@
 #!/bin/bash
 
-# Verificar argumentos
+# Check if required arguments were provided
 if [ $# -lt 2 ]; then
-    echo "❌ Uso: $0 <platform> <tag> [options]"
-    echo "   platform: ios ou android"
-    echo "   tag: tag dos testes a serem executados (ex: searchTests)"
-    echo "   options: opções adicionais"
-    echo "      --skip-device-check: pula a verificação do dispositivo (útil quando o emulador já está em execução)"
+    echo "How to Run: ./run-tests.sh <platform> <tag>"
+    echo "Example: ./run-tests.sh ios searchTests"
+    echo "Available tags:"
+    echo "  - searchTests : Search functionality tests"
     exit 1
 fi
 
 platform=$1
 tag=$2
-skip_device_check=false
-
-# Verificar opções adicionais
-for arg in "${@:3}"; do
-    case $arg in
-        --skip-device-check)
-            skip_device_check=true
-            ;;
-    esac
-done
 
 # Function to check iOS device
 check_ios_simulator() {
@@ -148,12 +137,8 @@ elif [ "$platform" = "android" ]; then
     APP_ID="au.com.alfie.ecomm.debug"
     APK_PATH="$ARTIFACTS_PATH/Alfie.apk"
     
-    # Check Android device only if not skipped
-    if [ "$skip_device_check" = false ]; then
-        check_android_device
-    else
-        echo "✅ Pulando verificação do dispositivo Android (--skip-device-check)"
-    fi
+    # Check Android device
+    check_android_device
     
     # Check if APK exists
     if [ ! -f "$APK_PATH" ]; then
@@ -174,27 +159,7 @@ elif [ "$platform" = "android" ]; then
     else
         echo "✅ Android app already installed"
     fi
-#####
-    # Iniciar o aplicativo antes de executar os testes
-    echo "📱 Iniciando o aplicativo para verificar a estrutura da UI..."
-    adb shell monkey -p "$APP_ID" -c android.intent.category.LAUNCHER 1
-    sleep 5
-    
-    # Capturar a hierarquia de visualização para diagnóstico
-    echo "🔍 Capturando hierarquia de visualização para diagnóstico..."
-    mkdir -p reports/ui-dump
-    adb shell uiautomator dump /sdcard/window_dump.xml
-    adb pull /sdcard/window_dump.xml reports/ui-dump/
-    
-    # Procurar por elementos de pesquisa na hierarquia
-    echo "🔍 Procurando elementos de pesquisa na hierarquia..."
-    grep -i "search\|input\|edit" reports/ui-dump/window_dump.xml > reports/ui-dump/search_elements.txt
-    
-    # Configurar variáveis de ambiente para o Maestro
-    export MAESTRO_DRIVER_STARTUP_TIMEOUT=120000
-    export MAESTRO_DRIVER_INSTALL_TIMEOUT=120000
-    export MAESTRO_STUDIO_DEBUG=true
-#####
+
 else
     echo "❌ Invalid platform. Use 'ios' or 'android'"
     exit 1
@@ -209,10 +174,5 @@ echo "🆔 App ID: $APP_ID"
 timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
 report_file="reports/${timestamp}-report.html"
 
-#####
 # Run tests with explicit output path
-# maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file"
-#####
-# Run tests with explicit output path and additional options
-maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file" --debug-output=reports/debug --flatten-debug-output
-#####
+maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file"
