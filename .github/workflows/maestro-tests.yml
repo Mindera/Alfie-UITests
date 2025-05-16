@@ -22,7 +22,17 @@ jobs:
   mobile-test:
     name: Run ${{ github.event.inputs.platform }} UI Tests
     runs-on: ${{ github.event.inputs.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
-    
+    services:
+      emulator:
+        image: budtmo/docker-android-x86-11.0
+        privileged: true
+        ports:
+          - 6080:6080
+          - 5554:5554
+          - 5555:5555
+        options: >-
+          --device /dev/kvm
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -65,62 +75,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Xvfb
-        if: github.event.inputs.platform == 'android'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb
-
-      - name: Start Xvfb
-        if: github.event.inputs.platform == 'android'
-        run: |
-          Xvfb :0 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-          echo "DISPLAY=:0" >> $GITHUB_ENV
-
-      - name: Setup Android Emulator
-        if: github.event.inputs.platform == 'android'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 31
-          target: google_apis
-          arch: x86_64
-          profile: pixel_2
-          emulator-options: >-
-            -gpu swiftshader_indirect
-            -noaudio
-            -no-boot-anim
-            -no-snapshot
-            -memory 3072
-            -cores 2
-          script: |
-            # Criar diretório
-            mkdir -p artifacts
-            mkdir -p reports
-            
-            # Download do APK
-            echo "Downloading APK from ${{ github.event.inputs.app_url }}"
-            curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
-            
-            # Verificar se o download foi bem-sucedido
-            ls -la artifacts/
-            
-            # Aguardar o emulador estabilizar
-            echo "Aguardando o emulador estabilizar..."
-            sleep 90
-            
-            # Verificar estado do emulador
-            adb devices
-            
-            # Tentar instalar o APK
-            echo "Instalando APK..."
-            adb install -r artifacts/Alfie.apk
-            echo "✅ APK instalado com sucesso!"
-            
-            # Executar os testes usando o script run-tests.sh
-            # Passando o parâmetro --skip-device-check para evitar que o script tente inicializar o emulador novamente
-            echo "Executando testes via script..."
-            ./scripts/run-tests.sh android ${{ github.event.inputs.test_tag }} --skip-device-check
-
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
         run: |
@@ -154,4 +108,27 @@ jobs:
             test-artifacts/
             reports/
             ~/.maestro/tests/
-          retention-days: 30 
+          retention-days: 30
+
+      - name: Download APK (Android only)
+        if: github.event.inputs.platform == 'android'
+        run: curl -L "${{ github.event.inputs.app_url }}" -o Alfie.apk
+
+      - name: Wait for emulator to boot (Android only)
+        if: github.event.inputs.platform == 'android'
+        run: |
+          for i in {1..60}; do
+            if adb connect localhost:5555 && adb shell getprop sys.boot_completed | grep -m 1 '1'; then
+              echo "Emulador pronto!"
+              break
+            fi
+            echo "Aguardando emulador..."
+            sleep 5
+          done
+
+      - name: Install APK (Android only)
+        if: github.event.inputs.platform == 'android'
+        run: adb install Alfie.apk
+
+      - name: Run UI tests
+        run: ./scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }} --skip-device-check 
