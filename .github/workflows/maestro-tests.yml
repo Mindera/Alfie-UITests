@@ -65,6 +65,18 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Install Xvfb
+        if: github.event.inputs.platform == 'android'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+
+      - name: Start Xvfb
+        if: github.event.inputs.platform == 'android'
+        run: |
+          Xvfb :0 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+          echo "DISPLAY=:0" >> $GITHUB_ENV
+
       - name: Setup Android Emulator
         if: github.event.inputs.platform == 'android'
         uses: reactivecircus/android-emulator-runner@v2
@@ -94,7 +106,7 @@ jobs:
             
             # Aguardar o emulador estabilizar
             echo "Aguardando o emulador estabilizar..."
-            sleep 60
+            sleep 90
             
             # Verificar estado do emulador
             adb devices
