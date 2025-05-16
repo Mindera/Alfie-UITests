@@ -133,14 +133,19 @@ jobs:
 
       - name: Wait for emulator to boot
         run: |
-          for i in {1..60}; do
-            if adb connect localhost:5555 && adb shell getprop sys.boot_completed | grep -m 1 '1'; then
-              echo "Emulador pronto!"
-              break
+          for i in {1..90}; do
+            adb connect localhost:5555 || true
+            if adb devices | grep -w "device" | grep "5555"; then
+              if adb shell getprop sys.boot_completed | grep -m 1 '1'; then
+                echo "Emulador pronto!"
+                adb devices
+                break
+              fi
             fi
             echo "Aguardando emulador..."
             sleep 5
           done
+          adb devices      
 
       - name: Install APK
         run: adb install Alfie.apk
