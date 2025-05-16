@@ -97,7 +97,7 @@ jobs:
     if: github.event.inputs.platform == 'android'
     runs-on: ubuntu-latest
     container:
-      image: budtmo/docker-android-x86-11.0
+      image: budtmo/docker-android:emulator_11.0
       options: --privileged --device /dev/kvm
     steps:
       - name: Checkout code
