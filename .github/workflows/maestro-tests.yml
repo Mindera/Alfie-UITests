@@ -131,11 +131,19 @@ jobs:
       - name: Download APK
         run: curl -L "${{ github.event.inputs.app_url }}" -o Alfie.apk
 
+      - name: List adb devices (start)
+        run: adb devices
+
+      - name: List emulator processes
+        run: ps aux | grep emulator
+
+      - name: Show emulator logs
+        run: cat /root/logs/*.log || true
+
       - name: Wait for emulator to boot
         run: |
           for i in {1..90}; do
-            adb connect localhost:5555 || true
-            if adb devices | grep -w "device" | grep "5555"; then
+            if adb devices | grep -w "device" | grep "emulator-5554"; then
               if adb shell getprop sys.boot_completed | grep -m 1 '1'; then
                 echo "Emulador pronto!"
                 adb devices
@@ -145,7 +153,7 @@ jobs:
             echo "Aguardando emulador..."
             sleep 5
           done
-          adb devices      
+          adb devices  
 
       - name: Install APK
         run: adb install Alfie.apk
