@@ -125,6 +125,11 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
 
+      - name: Install adb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y android-sdk-platform-tools
+
       - name: Download APK
         run: curl -L "${{ github.event.inputs.app_url }}" -o Alfie.apk
 
