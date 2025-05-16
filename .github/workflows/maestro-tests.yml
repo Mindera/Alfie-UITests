@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: budtmo/docker-android:emulator_11.0
-      options: --privileged --device /dev/kvm
+      options: --privileged --device /dev/kvm --user 0
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
