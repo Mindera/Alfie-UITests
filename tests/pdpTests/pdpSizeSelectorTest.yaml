@@ -1,0 +1,28 @@
+appId: ${APP_ID}
+tags:
+  - pdpTests
+---
+- runFlow:
+    file: ../../generics/setup/launchApp.yaml
+
+# Navigate to a product
+- tapOn:
+    id: "search-input"
+- inputText: "jeans"
+- pressKey: enter
+- waitForAnimationToEnd
+- tapOn:
+    id: "product-card"
+    index: 0
+
+# Select a size
+- tapOn:
+    id: ${output.pdpScreen.sizeSelector}
+- tapOn:
+    text: "M"
+- waitForAnimationToEnd
+
+# Verify if add to bag button is enabled
+- assertVisible:
+    id: ${output.pdpScreen.addToBagButton}
+    enabled: true 

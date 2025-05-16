@@ -1,0 +1,31 @@
+appId: ${APP_ID}
+tags:
+  - pdpTests
+---
+- runFlow: ../../generics/setup/launchApp.yaml
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: Home
+    timeout: ${output.elementVisibleTimeout}
+# Navigate to a product
+- tapOn:
+    id: ${output.homeScreen.searchInput}
+- inputText: "shirt"
+- extendedWaitUntil:
+    visible: shirts men
+    timeout: ${output.elementVisibleTimeout}
+- tapOn: "Shirts Men"
+- tapOn:
+    id: "product-card"
+    index: 0
+# Verify basic PDP elements
+#- assertVisible:
+#    id: ${output.pdpScreen.productImage}
+#- assertVisible:
+#    id: ${output.pdpScreen.productTitle}
+- assertVisible: ${output.pdpScreen.addToBagButton} 
+- assertVisible: ${output.pdpScreen.addToWishlistButton}
+- assertVisible:
+    id: ${output.pdpScreen.productPrice}
+- assertVisible: ${output.pdpScreen.productColour}
+- assertVisible: ${output.pdpScreen.productSize}

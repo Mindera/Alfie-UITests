@@ -1,0 +1,34 @@
+appId: ${APP_ID}
+tags:
+  - pdpTests
+---
+- runFlow:
+    file: ../../generics/setup/launchApp.yaml
+
+# Navigate to a product
+- tapOn:
+    id: "search-input"
+- inputText: "shirts"
+- pressKey: enter
+- waitForAnimationToEnd
+- tapOn:
+    id: "product-card"
+    index: 0
+
+# Verify main image
+- assertVisible:
+    id: ${output.pdpScreen.productImage}
+
+# Navigate between images (swiping)
+- swipe:
+    direction: LEFT
+    on:
+      id: ${output.pdpScreen.productImage}
+- waitForAnimationToEnd
+
+# Go back to previous image
+- swipe:
+    direction: RIGHT
+    on:
+      id: ${output.pdpScreen.productImage}
+- waitForAnimationToEnd 

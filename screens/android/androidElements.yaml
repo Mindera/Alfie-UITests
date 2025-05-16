@@ -6,3 +6,5 @@ appId: ${APP_ID}
     file: ./plpScreen/plpScreen.js
 - runScript:
     file: ./searchScreen/searchScreen.js
+- runScript:
+    file: ./pdpScreen/pdpScreen.js

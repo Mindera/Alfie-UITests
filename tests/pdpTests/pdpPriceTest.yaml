@@ -1,0 +1,20 @@
+appId: ${APP_ID}
+tags:
+  - pdpTests
+---
+- runFlow:
+    file: ../../generics/setup/launchApp.yaml
+
+# Navigate to a product
+- tapOn:
+    id: "search-input"
+- inputText: "jeans"
+- pressKey: enter
+- waitForAnimationToEnd
+- tapOn:
+    id: "product-card"
+    index: 0
+
+# Verify if price is visible
+- assertVisible:
+    id: ${output.pdpScreen.productPrice} 

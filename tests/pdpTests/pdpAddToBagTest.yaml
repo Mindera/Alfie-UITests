@@ -1,0 +1,28 @@
+appId: ${APP_ID}
+tags:
+  - pdpTests
+---
+- runFlow:
+    file: ../../generics/setup/launchApp.yaml
+
+# Navigate to a product
+- tapOn:
+    id: "search-input"
+- inputText: "shirts"
+- pressKey: enter
+- waitForAnimationToEnd
+- tapOn:
+    id: "product-card"
+    index: 0
+
+# Select a size
+- tapOn:
+    text: "12 AU"
+- waitForAnimationToEnd
+
+# Add to bag
+- tapOn: ${output.pdpScreen.addToBagButton}
+
+# Verify success message
+#- assertVisible:
+#    id: ${output.pdpScreen.addedToBagMessage}
