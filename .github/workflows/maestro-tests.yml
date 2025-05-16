@@ -96,9 +96,6 @@ jobs:
   mobile-test-android:
     if: github.event.inputs.platform == 'android'
     runs-on: ubuntu-latest
-    container:
-      image: budtmo/docker-android:emulator_11.0
-      options: --privileged --device /dev/kvm --user 0
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -139,6 +136,11 @@ jobs:
 
       - name: Show emulator logs
         run: cat /root/logs/*.log || true
+        
+      - name: Start Android emulator container
+        run: |
+          docker run -d --name android-emulator --privileged --device /dev/kvm -p 5555:5555 -p 5554:5554 -p 6080:6080 budtmo/docker-android:emulator_13.0
+          sleep 30
 
       - name: Wait for emulator to boot
         run: |
