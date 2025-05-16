@@ -19,20 +19,9 @@ on:
         default: 'searchTests'
 
 jobs:
-  mobile-test:
-    name: Run ${{ github.event.inputs.platform }} UI Tests
-    runs-on: ${{ github.event.inputs.platform == 'ios' && 'macos-latest' || 'ubuntu-latest' }}
-    services:
-      emulator:
-        image: budtmo/docker-android-x86-11.0
-        privileged: true
-        ports:
-          - 6080:6080
-          - 5554:5554
-          - 5555:5555
-        options: >-
-          --device /dev/kvm
-
+  mobile-test-ios:
+    if: github.event.inputs.platform == 'ios'
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -63,20 +52,11 @@ jobs:
           echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
 
       - name: Setup iOS dependencies
-        if: github.event.inputs.platform == 'ios'
         run: |
           sudo xcode-select --switch /Applications/Xcode.app
           xcrun simctl list devices
 
-      - name: Setup Java
-        if: github.event.inputs.platform == 'android'
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
       - name: Setup iOS app
-        if: github.event.inputs.platform == 'ios'
         run: |
           RUNTIME_ID=$(xcrun simctl list runtimes | grep iOS | tail -n1 | cut -d ' ' -f7)
           DEVICE_NAME="iPhone 15"
@@ -92,6 +72,9 @@ jobs:
       - name: Give permission to run script
         run: chmod +x scripts/run-tests.sh
 
+      - name: Run UI tests
+        run: ./scripts/run-tests.sh ios ${{ github.event.inputs.test_tag }} --skip-device-check
+
       - name: Collect test artifacts
         if: always()
         run: |
@@ -103,19 +86,52 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.inputs.platform }}-test-results
+          name: ios-test-results
           path: |
             test-artifacts/
             reports/
             ~/.maestro/tests/
           retention-days: 30
 
-      - name: Download APK (Android only)
-        if: github.event.inputs.platform == 'android'
+  mobile-test-android:
+    if: github.event.inputs.platform == 'android'
+    runs-on: ubuntu-latest
+    container:
+      image: budtmo/docker-android-x86-11.0
+      options: --privileged --device /dev/kvm
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Checkout Alfie-Mocks repository
+        uses: actions/checkout@v3
+        with:
+          repository: Mindera/Alfie-Mocks
+          path: alfie-mocks
+
+      - name: Install and Start Mock Server
+        run: |
+          cd alfie-mocks
+          npm install apollo-server graphql
+          node index.js &
+          sleep 5
+          curl -s http://localhost:4000 > /dev/null || exit 1
+          cd ..
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Download APK
         run: curl -L "${{ github.event.inputs.app_url }}" -o Alfie.apk
 
-      - name: Wait for emulator to boot (Android only)
-        if: github.event.inputs.platform == 'android'
+      - name: Wait for emulator to boot
         run: |
           for i in {1..60}; do
             if adb connect localhost:5555 && adb shell getprop sys.boot_completed | grep -m 1 '1'; then
@@ -126,9 +142,29 @@ jobs:
             sleep 5
           done
 
-      - name: Install APK (Android only)
-        if: github.event.inputs.platform == 'android'
+      - name: Install APK
         run: adb install Alfie.apk
 
+      - name: Give permission to run script
+        run: chmod +x scripts/run-tests.sh
+
       - name: Run UI tests
-        run: ./scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }} --skip-device-check 
+        run: ./scripts/run-tests.sh android ${{ github.event.inputs.test_tag }} --skip-device-check
+
+      - name: Collect test artifacts
+        if: always()
+        run: |
+          mkdir -p test-artifacts
+          cp -r reports/* test-artifacts/ || true
+          cp -r ~/.maestro/tests/* test-artifacts/screenshots/ || true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-results
+          path: |
+            test-artifacts/
+            reports/
+            ~/.maestro/tests/
+          retention-days: 30 
