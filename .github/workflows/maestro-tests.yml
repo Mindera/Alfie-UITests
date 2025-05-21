@@ -69,44 +69,31 @@ jobs:
         if: github.event.inputs.platform == 'android'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29
+          api-level: 30
           target: google_apis
           arch: x86_64
           profile: pixel_2
-          emulator-options: >-
-            -no-window
-            -gpu swiftshader_indirect
-            -noaudio
-            -no-boot-anim
-            -no-snapshot
-            -memory 3072
-            -cores 2
+          emulator-options: -no-window -no-audio -no-boot-anim
+          disable-animations: true
           script: |
-            # Criar diretório
             mkdir -p artifacts
             mkdir -p reports
-            
-            # Download do APK
+
             echo "Downloading APK from ${{ github.event.inputs.app_url }}"
             curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
-            
-            # Verificar se o download foi bem-sucedido
+
             ls -la artifacts/
-            
-            # Aguardar o emulador estabilizar
+
             echo "Aguardando o emulador estabilizar..."
-            sleep 60
-            
-            # Verificar estado do emulador
+            adb wait-for-device
+            sleep 30
+
             adb devices
-            
-            # Tentar instalar o APK
+
             echo "Instalando APK..."
             adb install -r artifacts/Alfie.apk
             echo "✅ APK instalado com sucesso!"
-            
-            # Executar os testes usando o script run-tests.sh
-            # Passando o parâmetro --skip-device-check para evitar que o script tente inicializar o emulador novamente
+
             echo "Executando testes via script..."
             ./scripts/run-tests.sh android ${{ github.event.inputs.test_tag }} --skip-device-check
 
