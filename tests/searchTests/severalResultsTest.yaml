@@ -1,4 +1,4 @@
-appId: ${APP_ID}
+appId: com.mindera.alfie.debug
 name: Search With Several Results
 tags:
     - searchTests
