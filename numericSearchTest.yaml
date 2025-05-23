@@ -3,7 +3,7 @@ name: Numeric Search
 tags:
     - searchTests
 ---
-- launchApp:
+- launchApp
 - waitForAnimationToEnd
 - tapOn:
     id: "search-input"
