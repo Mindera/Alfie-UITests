@@ -1,8 +1,0 @@
-appId: com.mindera.alfie.debug
----
-- runScript:
-    file: /screens/iOS/homeScreen/homeScreen.js
-- runScript:
-    file: /screens/iOS/plpScreen/plpScreen.js
-- runScript:
-    file: /screens/iOS/searchScreen/searchScreen.js

@@ -1,8 +1,0 @@
-appId: com.mindera.alfie.debug
----
-- runScript:
-    file: /screens/android/homeScreen/homeScreen.js
-- runScript:
-    file: /screens/android/plpScreen/plpScreen.js
-- runScript:
-    file: /screens/android/searchScreen/searchScreen.js
