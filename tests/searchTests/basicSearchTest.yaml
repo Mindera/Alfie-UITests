@@ -3,7 +3,7 @@ name: Basic Search
 tags:
     - searchTests
 ---
-- runFlow: ../../generics/setup/launchApp.yaml
+- runFlow: /generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible: Home

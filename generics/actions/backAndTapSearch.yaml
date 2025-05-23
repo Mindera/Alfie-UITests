@@ -4,9 +4,9 @@ appId: com.mindera.alfie.debug
     when:
         platform: "Android"
     commands:
-        - runFlow: android/androidBackAndTapSearch.yaml
+        - runFlow: /generics/actions/android/androidBackAndTapSearch.yaml
 - runFlow:
     when:
         platform: "iOS"
     commands:
-        - runFlow: iOS/iOSBackAndTapSearch.yaml
+        - runFlow: /generics/actions/iOS/iOSBackAndTapSearch.yaml

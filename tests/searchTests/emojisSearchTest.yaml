@@ -7,7 +7,7 @@ tags:
     when:
       platform: "iOS"
     commands:
-      - runFlow: ../../generics/setup/launchApp.yaml
+      - runFlow: /generics/setup/launchApp.yaml
       - waitForAnimationToEnd
       - tapOn:
             id: ${output.homeScreen.searchInput}

@@ -1,17 +1,17 @@
 appId: com.mindera.alfie.debug
 ---
 - runScript:
-    file: ../configuration/config.js
+    file: /generics/configuration/config.js
 - runFlow:
     when:
         platform: "Android"
     commands:
-        - runFlow: ../../screens/android/androidElements.yaml
+        - runFlow: /screens/android/androidElements.yaml
 - runFlow:
     when:
         platform: "iOS"
     commands:
-        - runFlow: ../../screens/ios/iOSElements.yaml
+        - runFlow: /screens/ios/iOSElements.yaml
 - launchApp:
     clearState: true
     clearKeychain: true
