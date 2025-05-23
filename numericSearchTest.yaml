@@ -3,7 +3,8 @@ name: Numeric Search
 tags:
     - searchTests
 ---
-- launchApp
+- launchApp:
+    permissions: { all: unset }
 - waitForAnimationToEnd
 - tapOn:
     id: "search-input"
