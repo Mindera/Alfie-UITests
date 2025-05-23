@@ -4,8 +4,6 @@ tags:
     - searchTests
 ---
 - launchApp:
-    permissions:
-        all: allow
 - waitForAnimationToEnd
 - tapOn:
     id: "search-input"
