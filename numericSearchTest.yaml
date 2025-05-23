@@ -4,8 +4,6 @@ tags:
     - searchTests
 ---
 - launchApp:
-    clearState: true
-    clearKeychain: true
     permissions:
         all: allow
 - waitForAnimationToEnd
