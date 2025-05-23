@@ -1,10 +1,9 @@
-appId: com.mindera.alfie.debug
+appId: au.com.alfie.ecomm.debug
 name: Numeric Search
 tags:
     - searchTests
 ---
-- launchApp:
-    permissions: { all: unset }
+- launchApp
 - waitForAnimationToEnd
 - tapOn:
     id: "search-input"
