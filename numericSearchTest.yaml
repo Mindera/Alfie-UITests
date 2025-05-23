@@ -3,7 +3,11 @@ name: Numeric Search
 tags:
     - searchTests
 ---
-- launchApp
+- launchApp:
+    permissions:
+      all: unset # This will unset all other permissions
+    clearState: false # This prevents clearing the app state
+    stopApp: false # This prevents stopping the app before launching
 - waitForAnimationToEnd
 - tapOn:
     id: "search-input"
