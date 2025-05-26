@@ -3,7 +3,7 @@ name: Numeric Search
 tags:
     - searchTests
 ---
-- runFlow: generics/setup/launchApp.yaml
+- runFlow: ../generics/setup/launchApp.yaml
 - tapOn:
     id: "search-input"
 - inputText: "1234567890"
