@@ -35,12 +35,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Checkout Alfie-Mocks repository
-        uses: actions/checkout@v3
-        with:
-          repository: Mindera/Alfie-Mocks
-          path: alfie-mocks
-
       - name: Setup BrowserStack Local
         if: ${{ inputs.bs_local }}
         id: setup_local
@@ -73,6 +67,30 @@ jobs:
         env:
           BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
 
+      - name: Checkout Alfie-Mocks repository
+        uses: actions/checkout@v3
+        with:
+          repository: Mindera/Alfie-Mocks
+          path: alfie-mocks
+
+      - name: Install and Start Mock Server
+        run: |
+          cd alfie-mocks
+          npm install apollo-server graphql
+          # Start the mock server in background
+          node index.js &
+          # Wait for server to be ready
+          sleep 5
+          # Verify server is running
+          curl -s http://localhost:4000 > /dev/null
+          if [ $? -eq 0 ]; then
+            echo "✅ Mock server is running"
+          else
+            echo "❌ Failed to start mock server"
+            exit 1
+          fi
+          cd ..
+      
       - name: Prepare Tests
         id: prepare_tests
         run: |
@@ -256,4 +274,13 @@ jobs:
           path: |
             test_execution_details.json
             bs_local.log
-          retention-days: 5 
+          retention-days: 5
+
+      - name: Stop Mock Server
+        if: always()
+        run: |
+          if [ -f alfie-mocks/mock_server.pid ]; then
+            pid=$(cat alfie-mocks/mock_server.pid)
+            kill $pid || true
+            rm alfie-mocks/mock_server.pid
+          fi 
