@@ -13,13 +13,48 @@ on:
         required: true
         type: string
         default: 'com.example.app'
+      bs_local:
+        description: 'Run with BrowserStack Local'
+        type: boolean
+        default: true
+      bs_app:
+        description: 'BrowserStack App ID (bs://...)'
+        required: true
+        type: string
+      devices:
+        description: 'Devices to test on (comma-separated, e.g., "iPhone 15-17.0,iPhone 14-16.0")'
+        required: true
+        type: string
+        default: 'iPhone 15-17.0'
 
 jobs:
   prepare-tests:
     runs-on: ubuntu-latest
+    outputs:
+      test_suite_url: ${{ steps.upload_to_browserstack.outputs.test_suite_url }}
     steps:
       - uses: actions/checkout@v4
       
+      - name: Checkout Alfie-Mocks repository
+        uses: actions/checkout@v3
+        with:
+          repository: Mindera/Alfie-Mocks
+          path: alfie-mocks
+
+      - name: Setup BrowserStack Local
+        if: ${{ inputs.bs_local }}
+        run: |
+          # Download BrowserStackLocal binary
+          wget "https://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip"
+          unzip BrowserStackLocal-linux-x64.zip
+          chmod +x BrowserStackLocal
+          
+          # Start BrowserStackLocal in background
+          ./BrowserStackLocal --key ${{ secrets.ACCESS_KEY }} --force-local &
+          
+          # Wait for connection
+          sleep 5
+          
       - name: Setup test directory structure
         run: |
           # Create temp directory structure
@@ -61,9 +96,91 @@ jobs:
           rm visible_files.txt
           rm -rf temp_tests
 
-      - name: Upload artifact
+      - name: Create zip for BrowserStack
+        run: |
+          cd clean_tests
+          zip -r ../browserstack_tests.zip ./*
+          cd ..
+
+      - name: Upload to BrowserStack
+        id: upload_to_browserstack
+        run: |
+          # Remove whitespace and replace commas with underscores for custom_id
+          CUSTOM_ID=$(echo "${{ inputs.test_folders }}" | tr -d ' ' | tr ',' '_')
+          
+          RESPONSE=$(curl -u "${{ secrets.USERNAME }}:${{ secrets.ACCESS_KEY }}" \
+            -X POST "https://api-cloud.browserstack.com/app-automate/maestro/v2/test-suite" \
+            -F "file=@browserstack_tests.zip" \
+            -F "custom_id=$CUSTOM_ID")
+          
+          echo "Response from BrowserStack: $RESPONSE"
+          
+          # Extract test_suite_url and set as output
+          TEST_SUITE_URL=$(echo $RESPONSE | jq -r '.test_suite_url')
+          echo "test_suite_url=$TEST_SUITE_URL" >> $GITHUB_OUTPUT
+          
+          # Optional: Save full response for debugging
+          echo "Full response saved to browserstack_response.json"
+          echo $RESPONSE > browserstack_response.json
+
+      - name: Upload response as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: browserstack_tests
-          path: clean_tests/
+          name: browserstack_response
+          path: browserstack_response.json
+          retention-days: 5
+
+      - name: Stop BrowserStack Local
+        if: ${{ inputs.bs_local }}
+        run: |
+          pkill BrowserStackLocal || true 
+
+  run-tests:
+    needs: prepare-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Test Suite
+        id: execute_suite
+        run: |
+          # Convert devices string to JSON array
+          DEVICES_JSON=$(echo "${{ inputs.devices }}" | \
+            tr ',' '\n' | \
+            jq -R . | \
+            jq -s .)
+          
+          # Prepare request body
+          REQUEST_BODY=$(jq -n \
+            --arg app "${{ inputs.bs_app }}" \
+            --arg suite "${{ needs.prepare-tests.outputs.test_suite_url }}" \
+            --argjson devices "$DEVICES_JSON" \
+            '{
+              "app": $app,
+              "testSuite": $suite,
+              "project": "Maestro_Test",
+              "devices": $devices,
+              "networkLogs": "true",
+              "deviceLogs": "true"
+            }')
+          
+          echo "Request body: $REQUEST_BODY"
+          
+          RESPONSE=$(curl -u "${{ secrets.USERNAME }}:${{ secrets.ACCESS_KEY }}" \
+            -X POST "https://api-cloud.browserstack.com/app-automate/maestro/v2/ios/build" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_BODY")
+          
+          echo "Response from BrowserStack: $RESPONSE"
+          
+          # Extract build_id and set as output
+          BUILD_ID=$(echo $RESPONSE | jq -r '.build_id')
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          
+          # Save response for debugging
+          echo $RESPONSE > browserstack_build_response.json
+
+      - name: Upload build response as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: browserstack_build_response
+          path: browserstack_build_response.json
           retention-days: 5 
