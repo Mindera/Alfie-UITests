@@ -28,11 +28,9 @@ on:
         default: 'iPhone 15-17.0'
 
 jobs:
-  prepare-tests:
+  run-tests:
     runs-on: ubuntu-latest
     environment: BrowserStack
-    outputs:
-      test_suite_url: ${{ steps.upload_to_browserstack.outputs.test_suite_url }}
     steps:
       - uses: actions/checkout@v4
       
@@ -42,55 +40,57 @@ jobs:
           repository: Mindera/Alfie-Mocks
           path: alfie-mocks
 
-      - name: Install and Start Mock Server
-        run: |
-          cd alfie-mocks
-          npm install apollo-server graphql
-          # Start the mock server in background
-          node index.js &
-          # Wait for server to be ready
-          sleep 5
-          # Verify server is running
-          curl -s http://localhost:4000 > /dev/null
-          if [ $? -eq 0 ]; then
-            echo "✅ Mock server is running"
-          else
-            echo "❌ Failed to start mock server"
-            exit 1
-          fi
-
       - name: Setup BrowserStack Local
         if: ${{ inputs.bs_local }}
+        id: setup_local
         run: |
+          # Download and setup BrowserStackLocal
           wget "https://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip"
           unzip BrowserStackLocal-linux-x64.zip
           chmod +x BrowserStackLocal
           
-          ./BrowserStackLocal --key ${BS_ACCESS_KEY} --force-local &
+          # Start BrowserStackLocal with logging
+          ./BrowserStackLocal --key ${BS_ACCESS_KEY} --force-local --verbose > bs_local.log 2>&1 &
           
-          sleep 5
+          # Store the PID
+          echo $! > bs_local.pid
+          
+          # Wait for connection to be established
+          for i in {1..30}; do
+            if grep -q "You can now access your local server(s)" bs_local.log; then
+              echo "BrowserStack Local connected successfully"
+              echo "local_ready=true" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            echo "Waiting for BrowserStack Local to connect... ($i/30)"
+            sleep 2
+          done
+          
+          echo "Error: BrowserStack Local failed to connect"
+          cat bs_local.log
+          exit 1
         env:
           BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
 
-      - name: Setup test directory structure
+      - name: Prepare Tests
+        id: prepare_tests
         run: |
-          # Create temp directory structure
+          # Create temporary directory
           mkdir -p temp_tests/tests
           
-          # Copy required directories
-          cp -r generics temp_tests/tests/
-          cp -r screens temp_tests/tests/
-          
-          # Convert comma-separated list to array and copy each folder's contents
+          # Copy test files
           IFS=',' read -ra FOLDERS <<< "${{ inputs.test_folders }}"
           for folder in "${FOLDERS[@]}"; do
-            # Remove any whitespace
-            folder=$(echo $folder | xargs)
-            echo "Processing folder: $folder"
-            cp -r tests/$folder/* temp_tests/tests/
+            if [ -d "tests/$folder" ]; then
+              cp -r "tests/$folder"/* "temp_tests/tests/"
+            fi
           done
           
-          # Update only test files paths to start with ./
+          # Copy generics and screens
+          cp -r tests/generics temp_tests/
+          cp -r tests/screens temp_tests/
+          
+          # Update paths in test files
           cd temp_tests/tests
           for f in *.yaml; do
             if [ -f "$f" ]; then
@@ -122,8 +122,6 @@ jobs:
       - name: Upload to BrowserStack
         id: upload_to_browserstack
         run: |
-          echo "Attempting upload to BrowserStack..."
-          
           # Remove whitespace and replace commas with underscores for custom_id
           CUSTOM_ID=$(echo "${{ inputs.test_folders }}" | tr -d ' ' | tr ',' '_')
           
@@ -133,57 +131,13 @@ jobs:
             -F "file=@browserstack_tests.zip" \
             -F "custom_id=$CUSTOM_ID")
           
-          if [ $? -ne 0 ]; then
-            echo "Error: Failed to upload to BrowserStack"
-            exit 1
-          fi
-          
           echo "Response from BrowserStack: $RESPONSE"
-          
-          if ! echo "$RESPONSE" | jq . >/dev/null 2>&1; then
-            echo "Error: Invalid JSON response"
-            echo "Raw response: $RESPONSE"
-            exit 1
-          fi
-          
-          # Extract test_suite_url and set as output
           TEST_SUITE_URL=$(echo $RESPONSE | jq -r '.test_suite_url')
-          
-          if [ -z "$TEST_SUITE_URL" ] || [ "$TEST_SUITE_URL" = "null" ]; then
-            echo "Error: No test_suite_url in response"
-            echo "Full response: $RESPONSE"
-            exit 1
-          fi
-          
           echo "test_suite_url=$TEST_SUITE_URL" >> $GITHUB_OUTPUT
-          
-          # Save full response for debugging
-          echo $RESPONSE > browserstack_response.json
         env:
           BS_USERNAME: ${{ secrets.USERNAME }}
           BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
 
-      - name: Upload response as artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: browserstack_response
-          path: browserstack_response.json
-          retention-days: 5
-
-      - name: Stop BrowserStack Local
-        if: ${{ inputs.bs_local }}
-        run: |
-          pkill BrowserStackLocal || true 
-
-  run-tests:
-    needs: prepare-tests
-    runs-on: ubuntu-latest
-    environment: BrowserStack
-    outputs:
-      test_status: ${{ steps.monitor_tests.outputs.status }}
-      test_results: ${{ steps.monitor_tests.outputs.results }}
-    steps:
       - name: Execute Test Suite
         id: execute_suite
         run: |
@@ -196,8 +150,9 @@ jobs:
           # Prepare request body
           REQUEST_BODY=$(jq -n \
             --arg app "${{ inputs.bs_app }}" \
-            --arg suite "${{ needs.prepare-tests.outputs.test_suite_url }}" \
+            --arg suite "$TEST_SUITE_URL" \
             --argjson devices "$DEVICES_JSON" \
+            --argjson local true \
             '{
               "app": $app,
               "testSuite": $suite,
@@ -205,7 +160,8 @@ jobs:
               "devices": $devices,
               "networkLogs": "true",
               "deviceLogs": "true",
-              "local": "true"
+              "local": $local,
+              "localIdentifier": "GH_WORKFLOW"
             }')
           
           echo "Request body: $REQUEST_BODY"
@@ -216,36 +172,13 @@ jobs:
             -H "Content-Type: application/json" \
             -d "$REQUEST_BODY")
           
-          if [ $? -ne 0 ]; then
-            echo "Error: Failed to start build"
-            exit 1
-          fi
-          
           echo "Response from BrowserStack: $RESPONSE"
-          
-          # Extract build_id and set as output
           BUILD_ID=$(echo $RESPONSE | jq -r '.build_id')
-          
-          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then
-            echo "Error: No build_id in response"
-            echo "Full response: $RESPONSE"
-            exit 1
-          fi
-          
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
-          
-          # Save response for debugging
-          echo $RESPONSE > browserstack_build_response.json
         env:
           BS_USERNAME: ${{ secrets.USERNAME }}
           BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
-
-      - name: Upload build response as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: browserstack_build_response
-          path: browserstack_build_response.json
-          retention-days: 5
+          TEST_SUITE_URL: ${{ steps.upload_to_browserstack.outputs.test_suite_url }}
 
       - name: Monitor Test Execution
         id: monitor_tests
@@ -292,16 +225,27 @@ jobs:
           BS_USERNAME: ${{ secrets.USERNAME }}
           BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
 
+      - name: Stop BrowserStack Local
+        if: always() && inputs.bs_local
+        run: |
+          if [ -f bs_local.pid ]; then
+            pid=$(cat bs_local.pid)
+            kill $pid || true
+            rm bs_local.pid
+          fi
+          
+          # Upload logs for debugging
+          if [ -f bs_local.log ]; then
+            echo "BrowserStack Local logs:"
+            cat bs_local.log
+          fi
+
       - name: Upload test details
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test_execution_details
-          path: test_execution_details.json
-          retention-days: 5
-
-      - name: Report Test Results
-        if: always()
-        run: |
-          echo "Test Status: ${{ steps.monitor_tests.outputs.status }}"
-          echo "Test Results: ${{ steps.monitor_tests.outputs.results }}" 
+          path: |
+            test_execution_details.json
+            bs_local.log
+          retention-days: 5 
