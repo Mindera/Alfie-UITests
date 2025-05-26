@@ -55,21 +55,15 @@ jobs:
           
           # Create list of visible files only
           cd temp_tests
-          find tests \( ! -regex '.*/\..*' \) -type f > files_to_zip.txt
-          
-          # Create zip with only visible files
-          zip browserstack_tests.zip -@ < files_to_zip.txt
-          
-          # Move zip to correct location
-          mv browserstack_tests.zip ../
-          
-          # Cleanup
+          find tests \( ! -regex '.*/\..*' \) -type f > files.txt
+          # Keep only the files we want
+          rsync -a --files-from=files.txt . ../clean_tests/
           cd ..
           rm -rf temp_tests
 
-      - name: Upload zip as artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: browserstack_tests
-          path: browserstack_tests.zip
+          path: clean_tests/tests/
           retention-days: 5 
