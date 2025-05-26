@@ -53,16 +53,14 @@ jobs:
           mv temp_tests/tests/copied_tests/* temp_tests/tests/
           rm -r temp_tests/tests/copied_tests
           
-          # Remove .DS_Store files
+          # Remove macOS and system files
           find temp_tests -name ".DS_Store" -delete
-          
-          # Create zip file with only allowed files, excluding macOS files
-          cd temp_tests
-          find . -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.js" -o -name "*.png" -o -name "*.jpeg" -o -name "*.jpg" -o -name "*.gif" -o -name "*.mp4" \) ! -name ".DS_Store" ! -name "._*" -print0 | xargs -0 zip ../browserstack_tests.zip
-          
-          # Cleanup
-          cd ..
-          rm -rf temp_tests
+          find temp_tests -name "._*" -delete
+
+      - uses: vimtor/action-zip@v1.2
+        with:
+          files: temp_tests/tests/
+          dest: browserstack_tests.zip
 
       - name: Upload zip as artifact
         uses: actions/upload-artifact@v4
