@@ -169,7 +169,7 @@ jobs:
               "devices": $devices,
               "networkLogs": "true",
               "deviceLogs": "true",
-              "local": $local,
+              "local": "${{ inputs.bs_local }}",
               "localIdentifier": "GH_WORKFLOW"
             }')
           
