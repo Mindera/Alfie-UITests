@@ -170,7 +170,6 @@ jobs:
               "networkLogs": "true",
               "deviceLogs": "true",
               "local": "${{ inputs.bs_local }}",
-              "localIdentifier": "GH_WORKFLOW"
             }')
           
           echo "Request body: $REQUEST_BODY"
