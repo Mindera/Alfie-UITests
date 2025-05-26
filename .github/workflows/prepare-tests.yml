@@ -163,6 +163,9 @@ jobs:
     needs: prepare-tests
     runs-on: ubuntu-latest
     environment: BrowserStack
+    outputs:
+      test_status: ${{ steps.monitor_tests.outputs.status }}
+      test_results: ${{ steps.monitor_tests.outputs.results }}
     steps:
       - name: Execute Test Suite
         id: execute_suite
@@ -184,7 +187,8 @@ jobs:
               "project": "Maestro_Test",
               "devices": $devices,
               "networkLogs": "true",
-              "deviceLogs": "true"
+              "deviceLogs": "true",
+              "local": $bs_local
             }')
           
           echo "Request body: $REQUEST_BODY"
@@ -224,4 +228,63 @@ jobs:
         with:
           name: browserstack_build_response
           path: browserstack_build_response.json
-          retention-days: 5 
+          retention-days: 5
+
+      - name: Monitor Test Execution
+        id: monitor_tests
+        run: |
+          BUILD_ID=${{ steps.execute_suite.outputs.build_id }}
+          STATUS="running"
+          
+          echo "Monitoring test execution..."
+          
+          while [ "$STATUS" = "running" ]; do
+            RESPONSE=$(curl -s -u "${BS_USERNAME}:${BS_ACCESS_KEY}" \
+              -X GET "https://api-cloud.browserstack.com/app-automate/maestro/v2/builds/${BUILD_ID}")
+            
+            STATUS=$(echo $RESPONSE | jq -r '.status')
+            echo "Current status: $STATUS"
+            
+            if [ "$STATUS" = "running" ]; then
+              echo "Tests still running, waiting 30 seconds..."
+              sleep 30
+            fi
+          done
+          
+          # Extract and format test results
+          TOTAL_COUNT=$(echo $RESPONSE | jq -r '.devices[0].sessions[0].testcases.count')
+          PASSED=$(echo $RESPONSE | jq -r '.devices[0].sessions[0].testcases.status.passed')
+          FAILED=$(echo $RESPONSE | jq -r '.devices[0].sessions[0].testcases.status.failed')
+          
+          # Create results summary
+          RESULTS="Total: $TOTAL_COUNT, Passed: $PASSED, Failed: $FAILED"
+          
+          # Set outputs
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "results=$RESULTS" >> $GITHUB_OUTPUT
+          
+          # Save detailed response
+          echo $RESPONSE > test_execution_details.json
+          
+          # Exit with error if tests failed
+          if [ "$STATUS" = "failed" ]; then
+            echo "Tests failed! Check results above."
+            exit 1
+          fi
+        env:
+          BS_USERNAME: ${{ secrets.USERNAME }}
+          BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
+
+      - name: Upload test details
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_execution_details
+          path: test_execution_details.json
+          retention-days: 5
+
+      - name: Report Test Results
+        if: always()
+        run: |
+          echo "Test Status: ${{ steps.monitor_tests.outputs.status }}"
+          echo "Test Results: ${{ steps.monitor_tests.outputs.results }}" 
