@@ -41,9 +41,9 @@ jobs:
             cp -r tests/$folder/* temp_tests/copied_tests/
           done
           
-          # Update paths ONLY in test files
-          find temp_tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../generics|generics|g' {} +
-          find temp_tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../screens|screens|g' {} +
+          # Update paths ONLY in test files (../../ to ./)
+          find temp_tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../generics|./generics|g' {} +
+          find temp_tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../screens|./screens|g' {} +
           
           # Update APP_ID in all yaml files
           find temp_tests -name "*.yaml" -type f -exec sed -i "s|\${env.APP_ID}|${{ inputs.app_id }}|g" {} +
@@ -53,9 +53,9 @@ jobs:
           mv temp_tests/copied_tests/* temp_tests/
           rm -r temp_tests/copied_tests
           
-          # Create zip file
+          # Create zip file with only allowed files
           cd temp_tests
-          zip -r ../browserstack_tests.zip ./*
+          find . -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.js" -o -name "*.png" -o -name "*.jpeg" -o -name "*.jpg" -o -name "*.gif" -o -name "*.mp4" \) -print0 | xargs -0 zip ../browserstack_tests.zip
           
           # Cleanup
           cd ..
