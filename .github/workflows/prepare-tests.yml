@@ -30,6 +30,7 @@ on:
 jobs:
   prepare-tests:
     runs-on: ubuntu-latest
+    environment: BrowserStack
     outputs:
       test_suite_url: ${{ steps.upload_to_browserstack.outputs.test_suite_url }}
     steps:
@@ -52,7 +53,7 @@ jobs:
           
           sleep 5
         env:
-          BS_ACCESS_KEY: ${{ secrets.BrowserStack.ACCESS_KEY }}
+          BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
 
       - name: Setup test directory structure
         run: |
@@ -142,8 +143,8 @@ jobs:
           # Save full response for debugging
           echo $RESPONSE > browserstack_response.json
         env:
-          BS_USERNAME: ${{ secrets.BrowserStack.USERNAME }}
-          BS_ACCESS_KEY: ${{ secrets.BrowserStack.ACCESS_KEY }}
+          BS_USERNAME: ${{ secrets.USERNAME }}
+          BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
 
       - name: Upload response as artifact
         if: always()
@@ -161,6 +162,7 @@ jobs:
   run-tests:
     needs: prepare-tests
     runs-on: ubuntu-latest
+    environment: BrowserStack
     steps:
       - name: Execute Test Suite
         id: execute_suite
@@ -214,8 +216,8 @@ jobs:
           # Save response for debugging
           echo $RESPONSE > browserstack_build_response.json
         env:
-          BS_USERNAME: ${{ secrets.BrowserStack.USERNAME }}
-          BS_ACCESS_KEY: ${{ secrets.BrowserStack.ACCESS_KEY }}
+          BS_USERNAME: ${{ secrets.USERNAME }}
+          BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
 
       - name: Upload build response as artifact
         uses: actions/upload-artifact@v4
