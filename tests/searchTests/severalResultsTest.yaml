@@ -1,0 +1,28 @@
+appId: ${APP_ID}
+name: Several Results
+tags:
+    - searchTests
+---
+- runFlow: ../../generics/setup/launchApp.yaml
+- waitForAnimationToEnd
+- tapOn:
+    id: ${output.homeScreen.searchInput}
+- inputText: "shirt"
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: 
+        id: "product-card"
+        index: 0
+    timeout: ${output.elementVisibleTimeout}
+- runFlow:
+    when:
+      platform: "iOS"
+    commands:
+      - assertVisible:
+            id: ${output.plpScreen.resultsLabel}
+- runFlow:
+    when:
+      platform: "Android"
+    commands:
+      - assertVisible:
+            id: ${output.plpScreen.titleHeader}

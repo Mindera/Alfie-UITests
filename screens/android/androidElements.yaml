@@ -1,8 +1,5 @@
-appId: com.mindera.alfie
+appId: ${env.APP_ID}
 ---
-- runScript:
-    file: ./homeScreen/homeScreen.js
-- runScript:
-    file: ./plpScreen/plpScreen.js
-- runScript:
-    file: ./searchScreen/searchScreen.js
+- runScript: ./homeScreen/homeScreen.js
+- runScript: ./plpScreen/plpScreen.js
+- runScript: ./searchScreen/searchScreen.js

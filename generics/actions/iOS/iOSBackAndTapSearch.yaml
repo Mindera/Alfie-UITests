@@ -1,4 +1,4 @@
-appId: com.mindera.alfie
+appId: ${env.APP_ID}
 ---
 - tapOn: 
     text: randText  # Any random text that does not exist in the UI

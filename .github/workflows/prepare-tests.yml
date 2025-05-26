@@ -1,0 +1,60 @@
+name: Prepare Tests for BrowserStack
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_folders:
+        description: 'Folders containing tests to prepare (comma-separated, e.g., searchTests,cartTests)'
+        required: true
+        type: string
+        default: 'searchTests'
+
+jobs:
+  prepare-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup test directory structure
+        run: |
+          # Create temp directory for restructuring
+          mkdir -p temp_tests
+          
+          # Copy required directories maintaining structure
+          cp -r generics temp_tests/
+          cp -r screens temp_tests/
+          
+          # Create directory for tests
+          mkdir -p temp_tests/copied_tests
+          
+          # Convert comma-separated list to array and copy each folder
+          IFS=',' read -ra FOLDERS <<< "${{ inputs.test_folders }}"
+          for folder in "${FOLDERS[@]}"; do
+            # Remove any whitespace
+            folder=$(echo $folder | xargs)
+            echo "Processing folder: $folder"
+            cp -r tests/$folder/* temp_tests/copied_tests/
+          done
+          
+          # Update paths ONLY in test files
+          find temp_tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../generics|generics|g' {} +
+          find temp_tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../screens|screens|g' {} +
+          
+          # Move tests to root level
+          mv temp_tests/copied_tests/* temp_tests/
+          rm -r temp_tests/copied_tests
+          
+          # Create zip file
+          cd temp_tests
+          zip -r ../browserstack_tests.zip ./*
+          
+          # Cleanup
+          cd ..
+          rm -rf temp_tests
+
+      - name: Upload zip as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: browserstack_tests
+          path: browserstack_tests.zip
+          retention-days: 5 

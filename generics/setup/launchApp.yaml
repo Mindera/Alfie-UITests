@@ -1,7 +1,6 @@
-appId: com.mindera.alfie
+appId: ${env.APP_ID}
 ---
-- runScript:
-    file: ../configuration/config.js
+- runScript: ../../generics/configuration/config.js
 - runFlow:
     when:
         platform: "Android"
@@ -11,11 +10,10 @@ appId: com.mindera.alfie
     when:
         platform: "iOS"
     commands:
-        - runFlow: ../../screens/ios/iOSElements.yaml
+        - runFlow: ../../screens/iOS/iOSElements.yaml
 - launchApp:
     clearState: true
     clearKeychain: true
     permissions:
         all: allow
-- tapOn: "Allow"
 - waitForAnimationToEnd
