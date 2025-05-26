@@ -53,14 +53,19 @@ jobs:
           mv temp_tests/tests/copied_tests/* temp_tests/tests/
           rm -r temp_tests/tests/copied_tests
           
-          # Remove macOS and system files
-          find temp_tests -name ".DS_Store" -delete
-          find temp_tests -name "._*" -delete
-
-      - uses: vimtor/action-zip@v1.2
-        with:
-          files: temp_tests/tests/
-          dest: browserstack_tests.zip
+          # Create list of visible files only
+          cd temp_tests
+          find tests \( ! -regex '.*/\..*' \) -type f > files_to_zip.txt
+          
+          # Create zip with only visible files
+          zip browserstack_tests.zip -@ < files_to_zip.txt
+          
+          # Move zip to correct location
+          mv browserstack_tests.zip ../
+          
+          # Cleanup
+          cd ..
+          rm -rf temp_tests
 
       - name: Upload zip as artifact
         uses: actions/upload-artifact@v4
