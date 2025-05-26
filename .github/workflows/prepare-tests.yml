@@ -8,6 +8,11 @@ on:
         required: true
         type: string
         default: 'searchTests'
+      app_id:
+        description: 'App ID to use in tests'
+        required: true
+        type: string
+        default: 'com.example.app'
 
 jobs:
   prepare-tests:
@@ -39,6 +44,10 @@ jobs:
           # Update paths ONLY in test files
           find temp_tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../generics|generics|g' {} +
           find temp_tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../screens|screens|g' {} +
+          
+          # Update APP_ID in all yaml files
+          find temp_tests -name "*.yaml" -type f -exec sed -i "s|\${env.APP_ID}|${{ inputs.app_id }}|g" {} +
+          find temp_tests -name "*.yaml" -type f -exec sed -i "s|\${APP_ID}|${{ inputs.app_id }}|g" {} +
           
           # Move tests to root level
           mv temp_tests/copied_tests/* temp_tests/

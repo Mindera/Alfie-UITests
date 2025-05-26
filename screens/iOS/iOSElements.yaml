@@ -1,4 +1,4 @@
-appId: ${env.APP_ID}
+appId: ${APP_ID}
 ---
 - runScript: ./homeScreen/homeScreen.js
 - runScript: ./plpScreen/plpScreen.js
