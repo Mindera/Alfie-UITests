@@ -19,7 +19,7 @@ appId: ${APP_ID}
 - waitForAnimationToEnd
 - runFlow:
     when:
-      visible: 'Allow'
+      visible: "Allow"
     commands:
-        - tapOn: 'Allow'
+        - tapOn: "Allow"
 - waitForAnimationToEnd
