@@ -42,6 +42,23 @@ jobs:
           repository: Mindera/Alfie-Mocks
           path: alfie-mocks
 
+      - name: Install and Start Mock Server
+        run: |
+          cd alfie-mocks
+          npm install apollo-server graphql
+          # Start the mock server in background
+          node index.js &
+          # Wait for server to be ready
+          sleep 5
+          # Verify server is running
+          curl -s http://localhost:4000 > /dev/null
+          if [ $? -eq 0 ]; then
+            echo "✅ Mock server is running"
+          else
+            echo "❌ Failed to start mock server"
+            exit 1
+          fi
+
       - name: Setup BrowserStack Local
         if: ${{ inputs.bs_local }}
         run: |
