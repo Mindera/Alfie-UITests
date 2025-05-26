@@ -1,0 +1,14 @@
+appId: com.mindera.alfie
+---
+- tapOn: 
+    text: randText  # Any random text that does not exist in the UI
+    optional: true  # This should be true so that the test won't fail
+    delay: 1000
+- tapOn: 
+    id: ${output.plpScreen.backButton}
+- tapOn: 
+    text: randText  # Any random text that does not exist in the UI
+    optional: true  # This should be true so that the test won't fail
+    delay: 1000
+- tapOn: 
+    id: ${output.searchScreen.backButton}

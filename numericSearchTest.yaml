@@ -3,12 +3,7 @@ name: Numeric Search
 tags:
     - searchTests
 ---
-- launchApp:
-    permissions:
-      all: unset # This will unset all other permissions
-    clearState: false # This prevents clearing the app state
-    stopApp: false # This prevents stopping the app before launching
-- waitForAnimationToEnd
+- runFlow: generics/setup/launchApp.yaml
 - tapOn:
     id: "search-input"
 - inputText: "1234567890"

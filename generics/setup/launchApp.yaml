@@ -1,0 +1,21 @@
+appId: com.mindera.alfie
+---
+- runScript:
+    file: ../configuration/config.js
+- runFlow:
+    when:
+        platform: "Android"
+    commands:
+        - runFlow: ../../screens/android/androidElements.yaml
+- runFlow:
+    when:
+        platform: "iOS"
+    commands:
+        - runFlow: ../../screens/ios/iOSElements.yaml
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    permissions:
+        all: allow
+- tapOn: "Allow"
+- waitForAnimationToEnd
