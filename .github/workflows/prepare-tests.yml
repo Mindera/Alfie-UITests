@@ -38,9 +38,15 @@ jobs:
             cp -r tests/$folder/* temp_tests/tests/
           done
           
-          # Remove ../../ from paths in test files
-          find temp_tests/tests -name "*.yaml" -type f -exec sed -i 's|../../generics|generics|g' {} +
-          find temp_tests/tests -name "*.yaml" -type f -exec sed -i 's|../../screens|screens|g' {} +
+          # Update only test files paths to start with ./
+          cd temp_tests/tests
+          for f in *.yaml; do
+            if [ -f "$f" ]; then
+              sed -i 's|../../generics|./generics|g' "$f"
+              sed -i 's|../../screens|./screens|g' "$f"
+            fi
+          done
+          cd ../..
           
           # Update APP_ID in all yaml files
           find temp_tests/tests -name "*.yaml" -type f -exec sed -i "s|\${env.APP_ID}|${{ inputs.app_id }}|g" {} +
