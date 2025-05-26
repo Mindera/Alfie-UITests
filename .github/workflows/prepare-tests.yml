@@ -32,8 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: BrowserStack
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Checkout Alfie-Mocks repository
         uses: actions/checkout@v3
         with:
@@ -75,6 +76,12 @@ jobs:
       - name: Prepare Tests
         id: prepare_tests
         run: |
+          # Debug: List folders
+          echo "Current directory structure:"
+          ls -la
+          echo "Tests directory structure:"
+          ls -la tests || echo "Tests directory not found"
+          
           # Create temporary directory
           mkdir -p temp_tests/tests
           
@@ -83,12 +90,14 @@ jobs:
           for folder in "${FOLDERS[@]}"; do
             if [ -d "tests/$folder" ]; then
               cp -r "tests/$folder"/* "temp_tests/tests/"
+            else
+              echo "Warning: Directory tests/$folder not found"
             fi
           done
           
           # Copy generics and screens
-          cp -r tests/generics temp_tests/
-          cp -r tests/screens temp_tests/
+          cp -r tests/generics temp_tests/ || echo "Warning: generics directory not found"
+          cp -r tests/screens temp_tests/ || echo "Warning: screens directory not found"
           
           # Update paths in test files
           cd temp_tests/tests
