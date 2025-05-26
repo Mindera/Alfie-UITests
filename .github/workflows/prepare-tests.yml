@@ -44,17 +44,16 @@ jobs:
       - name: Setup BrowserStack Local
         if: ${{ inputs.bs_local }}
         run: |
-          # Download BrowserStackLocal binary
           wget "https://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip"
           unzip BrowserStackLocal-linux-x64.zip
           chmod +x BrowserStackLocal
           
-          # Start BrowserStackLocal in background
-          ./BrowserStackLocal --key ${{ secrets.ACCESS_KEY }} --force-local &
+          ./BrowserStackLocal --key ${BS_ACCESS_KEY} --force-local &
           
-          # Wait for connection
           sleep 5
-          
+        env:
+          BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
+
       - name: Setup test directory structure
         run: |
           # Create temp directory structure
@@ -105,16 +104,13 @@ jobs:
       - name: Upload to BrowserStack
         id: upload_to_browserstack
         run: |
+          echo "Attempting upload to BrowserStack..."
+          
           # Remove whitespace and replace commas with underscores for custom_id
           CUSTOM_ID=$(echo "${{ inputs.test_folders }}" | tr -d ' ' | tr ',' '_')
           
-          # Create auth string
-          AUTH_STRING="${{ secrets.USERNAME }}:${{ secrets.ACCESS_KEY }}"
-          
-          echo "Attempting upload with auth..."
-          
           RESPONSE=$(curl --fail \
-            -u "${{ secrets.USERNAME }}:${{ secrets.ACCESS_KEY }}" \
+            -u "${BS_USERNAME}:${BS_ACCESS_KEY}" \
             -X POST "https://api-cloud.browserstack.com/app-automate/maestro/v2/test-suite" \
             -F "file=@browserstack_tests.zip" \
             -F "custom_id=$CUSTOM_ID")
@@ -145,6 +141,9 @@ jobs:
           
           # Save full response for debugging
           echo $RESPONSE > browserstack_response.json
+        env:
+          BS_USERNAME: ${{ secrets.USERNAME }}
+          BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
 
       - name: Upload response as artifact
         if: always()
@@ -189,7 +188,7 @@ jobs:
           echo "Request body: $REQUEST_BODY"
           
           RESPONSE=$(curl --fail \
-            -u "${{ secrets.USERNAME }}:${{ secrets.ACCESS_KEY }}" \
+            -u "${BS_USERNAME}:${BS_ACCESS_KEY}" \
             -X POST "https://api-cloud.browserstack.com/app-automate/maestro/v2/ios/build" \
             -H "Content-Type: application/json" \
             -d "$REQUEST_BODY")
@@ -214,6 +213,9 @@ jobs:
           
           # Save response for debugging
           echo $RESPONSE > browserstack_build_response.json
+        env:
+          BS_USERNAME: ${{ secrets.USERNAME }}
+          BS_ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
 
       - name: Upload build response as artifact
         uses: actions/upload-artifact@v4
