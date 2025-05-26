@@ -22,15 +22,15 @@ jobs:
       
       - name: Setup test directory structure
         run: |
-          # Create temp directory for restructuring
-          mkdir -p temp_tests
+          # Create temp directory structure
+          mkdir -p temp_tests/tests
           
           # Copy required directories maintaining structure
-          cp -r generics temp_tests/
-          cp -r screens temp_tests/
+          cp -r generics temp_tests/tests/
+          cp -r screens temp_tests/tests/
           
           # Create directory for tests
-          mkdir -p temp_tests/copied_tests
+          mkdir -p temp_tests/tests/copied_tests
           
           # Convert comma-separated list to array and copy each folder
           IFS=',' read -ra FOLDERS <<< "${{ inputs.test_folders }}"
@@ -38,20 +38,20 @@ jobs:
             # Remove any whitespace
             folder=$(echo $folder | xargs)
             echo "Processing folder: $folder"
-            cp -r tests/$folder/* temp_tests/copied_tests/
+            cp -r tests/$folder/* temp_tests/tests/copied_tests/
           done
           
           # Update paths ONLY in test files (../../ to ./)
-          find temp_tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../generics|./generics|g' {} +
-          find temp_tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../screens|./screens|g' {} +
+          find temp_tests/tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../generics|./generics|g' {} +
+          find temp_tests/tests/copied_tests -name "*.yaml" -type f -exec sed -i 's|../../screens|./screens|g' {} +
           
           # Update APP_ID in all yaml files
-          find temp_tests -name "*.yaml" -type f -exec sed -i "s|\${env.APP_ID}|${{ inputs.app_id }}|g" {} +
-          find temp_tests -name "*.yaml" -type f -exec sed -i "s|\${APP_ID}|${{ inputs.app_id }}|g" {} +
+          find temp_tests/tests -name "*.yaml" -type f -exec sed -i "s|\${env.APP_ID}|${{ inputs.app_id }}|g" {} +
+          find temp_tests/tests -name "*.yaml" -type f -exec sed -i "s|\${APP_ID}|${{ inputs.app_id }}|g" {} +
           
-          # Move tests to root level
-          mv temp_tests/copied_tests/* temp_tests/
-          rm -r temp_tests/copied_tests
+          # Move tests to tests root level
+          mv temp_tests/tests/copied_tests/* temp_tests/tests/
+          rm -r temp_tests/tests/copied_tests
           
           # Create zip file with only allowed files
           cd temp_tests
