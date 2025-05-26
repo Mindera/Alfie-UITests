@@ -50,13 +50,13 @@ jobs:
           find temp_tests -name "*.yaml" -type f -exec sed -i "s|\${env.APP_ID}|${{ inputs.app_id }}|g" {} +
           find temp_tests -name "*.yaml" -type f -exec sed -i "s|\${APP_ID}|${{ inputs.app_id }}|g" {} +
           
-          # Create list of visible files only
+          # Create list of visible files only and copy them
           cd temp_tests
-          find . \( ! -regex '.*/\..*' \) -type f > files.txt
-          # Keep only the files we want
+          find . \( ! -regex '.*/\..*' \) -type f > ../visible_files.txt
           mkdir -p ../clean_tests
-          rsync -a --files-from=files.txt . ../clean_tests/
+          rsync -a --files-from=../visible_files.txt . ../clean_tests/
           cd ..
+          rm visible_files.txt
           rm -rf temp_tests
 
       - name: Upload artifact
