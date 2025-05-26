@@ -108,22 +108,46 @@ jobs:
           # Remove whitespace and replace commas with underscores for custom_id
           CUSTOM_ID=$(echo "${{ inputs.test_folders }}" | tr -d ' ' | tr ',' '_')
           
-          RESPONSE=$(curl -u "${{ secrets.USERNAME }}:${{ secrets.ACCESS_KEY }}" \
+          # Create auth string
+          AUTH_STRING="${{ secrets.USERNAME }}:${{ secrets.ACCESS_KEY }}"
+          
+          echo "Attempting upload with auth..."
+          
+          RESPONSE=$(curl --fail \
+            -u "${{ secrets.USERNAME }}:${{ secrets.ACCESS_KEY }}" \
             -X POST "https://api-cloud.browserstack.com/app-automate/maestro/v2/test-suite" \
             -F "file=@browserstack_tests.zip" \
             -F "custom_id=$CUSTOM_ID")
           
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to upload to BrowserStack"
+            exit 1
+          fi
+          
           echo "Response from BrowserStack: $RESPONSE"
+          
+          if ! echo "$RESPONSE" | jq . >/dev/null 2>&1; then
+            echo "Error: Invalid JSON response"
+            echo "Raw response: $RESPONSE"
+            exit 1
+          fi
           
           # Extract test_suite_url and set as output
           TEST_SUITE_URL=$(echo $RESPONSE | jq -r '.test_suite_url')
+          
+          if [ -z "$TEST_SUITE_URL" ] || [ "$TEST_SUITE_URL" = "null" ]; then
+            echo "Error: No test_suite_url in response"
+            echo "Full response: $RESPONSE"
+            exit 1
+          fi
+          
           echo "test_suite_url=$TEST_SUITE_URL" >> $GITHUB_OUTPUT
           
-          # Optional: Save full response for debugging
-          echo "Full response saved to browserstack_response.json"
+          # Save full response for debugging
           echo $RESPONSE > browserstack_response.json
 
       - name: Upload response as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: browserstack_response
@@ -164,15 +188,28 @@ jobs:
           
           echo "Request body: $REQUEST_BODY"
           
-          RESPONSE=$(curl -u "${{ secrets.USERNAME }}:${{ secrets.ACCESS_KEY }}" \
+          RESPONSE=$(curl --fail \
+            -u "${{ secrets.USERNAME }}:${{ secrets.ACCESS_KEY }}" \
             -X POST "https://api-cloud.browserstack.com/app-automate/maestro/v2/ios/build" \
             -H "Content-Type: application/json" \
             -d "$REQUEST_BODY")
+          
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to start build"
+            exit 1
+          fi
           
           echo "Response from BrowserStack: $RESPONSE"
           
           # Extract build_id and set as output
           BUILD_ID=$(echo $RESPONSE | jq -r '.build_id')
+          
+          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then
+            echo "Error: No build_id in response"
+            echo "Full response: $RESPONSE"
+            exit 1
+          fi
+          
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
           
           # Save response for debugging
