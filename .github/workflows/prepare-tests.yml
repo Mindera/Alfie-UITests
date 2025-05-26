@@ -188,7 +188,6 @@ jobs:
               "devices": $devices,
               "networkLogs": "true",
               "deviceLogs": "true",
-              "local": $bs_local
             }')
           
           echo "Request body: $REQUEST_BODY"

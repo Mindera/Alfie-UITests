@@ -16,6 +16,7 @@ appId: ${APP_ID}
     clearKeychain: true
     permissions:
         all: allow
+- waitForAnimationToEnd
 - runFlow:
     when:
       visible: 'Allow'
