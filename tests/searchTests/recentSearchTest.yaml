@@ -1,9 +1,9 @@
-appId: com.mindera.alfie
+appId: ${APP_ID}
 name: Recent Search
 tags:
     - searchTests
 ---
-- runFlow: ./generics/setup/launchApp.yaml
+- runFlow: .../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
     id: ${output.homeScreen.searchInput}

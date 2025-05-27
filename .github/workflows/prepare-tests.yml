@@ -127,8 +127,8 @@ jobs:
           for f in *.yaml; do
             if [ -f "$f" ]; then
               # Update paths to point to the new structure
-              sed -i 's|../../generics|generics|g' "$f"
-              sed -i 's|../../screens|screens|g' "$f"
+              sed -i 's|../../generics|./generics|g' "$f"
+              sed -i 's|../../screens|./screens|g' "$f"
             fi
           done
           cd ..

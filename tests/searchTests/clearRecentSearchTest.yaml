@@ -1,15 +1,15 @@
-appId: com.mindera.alfie
+appId: ${APP_ID}
 name: Clear Search History
 tags:
     - searchTests
 ---
-- runFlow: ./generics/setup/launchApp.yaml
+- runFlow: ../../generics/setup/launchApp.yaml
 - waitForAnimationToEnd
 - tapOn:
     id: ${output.homeScreen.searchInput}
 - inputText: "shirts"
 - pressKey: Enter
-- runFlow: ./generics/actions/backAndTapSearch.yaml
+- runFlow: ../../generics/actions/backAndTapSearch.yaml
 - waitForAnimationToEnd
 - tapOn: 
     id: ${output.homeScreen.searchInput}
