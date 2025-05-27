@@ -9,7 +9,7 @@ tags:
     id: ${output.homeScreen.searchInput}
 - inputText: "shirts"
 - pressKey: Enter
-- runFlow: ./generics/actions/backAndTapSearch.yaml
+- runFlow: ../../generics/actions/backAndTapSearch.yaml
 - waitForAnimationToEnd
 - tapOn: 
     id: ${output.homeScreen.searchInput}
