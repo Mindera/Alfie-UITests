@@ -289,4 +289,12 @@ jobs:
             pid=$(cat alfie-mocks/mock_server.pid)
             kill $pid || true
             rm alfie-mocks/mock_server.pid
-          fi 
+          fi
+
+      - name: Upload browserstack_tests.zip
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browserstack_tests
+          path: browserstack_tests.zip
+          retention-days: 5 
