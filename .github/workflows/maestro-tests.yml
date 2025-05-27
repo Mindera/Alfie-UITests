@@ -80,7 +80,7 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
 
-      - name: Run Android tests
+      - name: Run Android tests with emulator
         if: github.event.inputs.platform == 'android'
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -90,7 +90,8 @@ jobs:
           profile: Nexus 6
           script: |
             adb install artifacts/Alfie.apk
-            maestro test --device=emulator-5554 --format=junit --output=artifacts/android-results.xml tests/ --tags=${{ github.event.inputs.test_tag }}
+            # Sintaxe correta do Maestro
+            maestro test tests/ --format junit --output artifacts/android-results.xml --include-tags=${{ github.event.inputs.test_tag }}
 
       # iOS specific setup
       - name: Setup iOS dependencies
