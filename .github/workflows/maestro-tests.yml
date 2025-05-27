@@ -90,8 +90,8 @@ jobs:
           profile: Nexus 6
           script: |
             adb install artifacts/Alfie.apk
-            export APP_ID="au.com.alfie.ecomm.debug"
-            maestro test tests/ --format junit --output artifacts/android-results.xml --include-tags=${{ github.event.inputs.test_tag }}
+            APP_ID="au.com.alfie.ecomm.debug"
+            maestro test --env APP_ID="$APP_ID" tests/ --format junit --output artifacts/android-results.xml --include-tags=${{ github.event.inputs.test_tag }}
 
       # iOS specific setup
       - name: Setup iOS dependencies
