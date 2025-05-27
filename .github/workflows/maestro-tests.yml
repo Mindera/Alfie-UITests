@@ -21,7 +21,8 @@ on:
 jobs:
   mobile-test:
     name: Run ${{ github.event.inputs.platform }} UI Tests
-    runs-on: macos-15
+    # Use Ubuntu for Android, macOS for iOS (as recommended by the action)
+    runs-on: ${{ github.event.inputs.platform == 'android' && 'ubuntu-latest' || 'macos-latest' }}
     
     steps:
       - name: Checkout code
@@ -57,10 +58,39 @@ jobs:
           fi
           cd ..
 
-      - name: Install Maestro
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
+
+      # Install Maestro CLI
+      - name: Install Maestro CLI
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
-          echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      # Android setup using the dedicated action
+      - name: Enable KVM group perms
+        if: github.event.inputs.platform == 'android'
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Download Android APK
+        if: github.event.inputs.platform == 'android'
+        run: |
+          curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
+
+      - name: Run Android tests
+        if: github.event.inputs.platform == 'android'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          arch: x86_64
+          target: google_apis
+          profile: Nexus 6
+          script: |
+            adb install artifacts/Alfie.apk
+            maestro test --device=emulator-5554 --format=junit --output=artifacts/android-results.xml tests/ --tags=${{ github.event.inputs.test_tag }}
 
       # iOS specific setup
       - name: Setup iOS dependencies
@@ -101,7 +131,6 @@ jobs:
 
       - name: Create required directories
         run: |
-          mkdir -p artifacts
           mkdir -p reports
 
       # Platform specific app download and setup
@@ -149,48 +178,6 @@ jobs:
             xcrun simctl listapps "$DEVICE_ID"
             exit 1
           fi
-
-
-      - name: Setup Android app
-        if: github.event.inputs.platform == 'android'
-        run: |
-          curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
-          
-          # Use the same Android configuration that works in your workflow
-          sdkmanager "system-images;android-31;google_apis;arm64-v8a"
-          echo "no" | avdmanager create avd -n Medium_Phone_API_31 -k "system-images;android-31;google_apis;arm64-v8a"
-          
-          # Start emulator with x86_64
-          $ANDROID_HOME/emulator/emulator \
-            -avd Medium_Phone_API_31 \
-            -no-audio \
-            -no-boot-anim \
-            -no-window \
-            -gpu swiftshader_indirect \
-            -no-snapshot \
-            -memory 2048 &
-            
-          # Wait for device - same logic as your workflow
-          echo "Waiting for emulator to start..."
-          max_attempts=60
-          attempt=0
-          
-          while [ $attempt -lt $max_attempts ]; do
-            if adb shell getprop sys.boot_completed 2>&1 | grep -q "1"; then
-              echo "✅ Emulator is ready"
-              break
-            fi
-            echo "Attempt $((attempt+1))/$max_attempts: Waiting for emulator..."
-            attempt=$((attempt+1))
-            sleep 5
-          done
-          
-          # Install app
-          echo "Installing app..."
-          adb install artifacts/Alfie.apk || {
-            echo "❌ Failed to install app"
-            exit 1
-          }
 
       - name: Give permission to run script
         run: chmod +x scripts/run-tests.sh
