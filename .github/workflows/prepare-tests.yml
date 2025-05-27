@@ -45,7 +45,7 @@ jobs:
           chmod +x BrowserStackLocal
           
           # Start BrowserStackLocal with logging
-          ./BrowserStackLocal --key ${BS_ACCESS_KEY} --force-local --verbose > bs_local.log 2>&1 &
+          ./BrowserStackLocal --key ${BS_ACCESS_KEY} --verbose > bs_local.log 2>&1 &
           
           # Store the PID
           echo $! > bs_local.pid
