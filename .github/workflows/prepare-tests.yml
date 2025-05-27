@@ -49,8 +49,14 @@ jobs:
           unzip BrowserStackLocal-linux-x64.zip
           chmod +x BrowserStackLocal
           
-          # Start BrowserStackLocal with logging
-          ./BrowserStackLocal --key ${BS_ACCESS_KEY} --verbose > bs_local.log 2>&1 &
+          # Start BrowserStackLocal with proxy settings
+          ./BrowserStackLocal \
+            --key ${BS_ACCESS_KEY} \
+            --force-local \
+            --force-proxy \
+            --local-proxy-host localhost \
+            --local-proxy-port 4000 \
+            --verbose > bs_local.log 2>&1 &
           
           # Store the PID
           echo $! > bs_local.pid
@@ -99,11 +105,11 @@ jobs:
       - name: Prepare Tests
         id: prepare_tests
         run: |
-          # Debug: List folders
+          # Debug: List directory structure
           echo "Current directory structure:"
           ls -la
           echo "Tests directory structure:"
-          ls -la tests || echo "Tests directory not found"
+          ls -la tests
           
           # Create temporary directory
           mkdir -p temp_tests/tests
@@ -118,14 +124,15 @@ jobs:
             fi
           done
           
-          # Copy generics and screens
-          cp -r tests/generics temp_tests/ || echo "Warning: generics directory not found"
-          cp -r tests/screens temp_tests/ || echo "Warning: screens directory not found"
+          # Copy generics and screens from root directory
+          cp -r generics temp_tests/ || echo "Warning: generics directory not found"
+          cp -r screens temp_tests/ || echo "Warning: screens directory not found"
           
           # Update paths in test files
           cd temp_tests/tests
           for f in *.yaml; do
             if [ -f "$f" ]; then
+              # Update paths to point to the new structure
               sed -i 's|../../generics|./generics|g' "$f"
               sed -i 's|../../screens|./screens|g' "$f"
             fi
