@@ -52,6 +52,8 @@ jobs:
           # Start BrowserStackLocal with proxy settings
           ./BrowserStackLocal \
             --key ${BS_ACCESS_KEY} \
+            --local-proxy-host localhost \
+            --local-proxy-port 4000 \
             --verbose > bs_local.log 2>&1 &
           
           # Store the PID
