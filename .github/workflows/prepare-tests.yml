@@ -105,31 +105,25 @@ jobs:
       - name: Prepare Tests
         id: prepare_tests
         run: |
-          # Debug: List directory structure
-          echo "Current directory structure:"
-          ls -la
-          echo "Tests directory structure:"
-          ls -la tests
-          
           # Create temporary directory
-          mkdir -p temp_tests/tests
+          mkdir -p temp_tests
           
-          # Copy test files
+          # Copy test files directly to temp_tests root
           IFS=',' read -ra FOLDERS <<< "${{ inputs.test_folders }}"
           for folder in "${FOLDERS[@]}"; do
             if [ -d "tests/$folder" ]; then
-              cp -r "tests/$folder"/* "temp_tests/tests/"
+              cp -r "tests/$folder"/* "temp_tests/"
             else
               echo "Warning: Directory tests/$folder not found"
             fi
           done
           
-          # Copy generics and screens from root directory
-          cp -r generics temp_tests/ || echo "Warning: generics directory not found"
-          cp -r screens temp_tests/ || echo "Warning: screens directory not found"
+          # Copy generics and screens as they are
+          cp -r generics temp_tests/
+          cp -r screens temp_tests/
           
           # Update paths in test files
-          cd temp_tests/tests
+          cd temp_tests
           for f in *.yaml; do
             if [ -f "$f" ]; then
               # Update paths to point to the new structure
@@ -137,11 +131,11 @@ jobs:
               sed -i 's|../../screens|screens|g' "$f"
             fi
           done
-          cd ../..
+          cd ..
           
           # Update APP_ID in all yaml files
-          find temp_tests/tests -name "*.yaml" -type f -exec sed -i "s|\${env.APP_ID}|${{ inputs.app_id }}|g" {} +
-          find temp_tests/tests -name "*.yaml" -type f -exec sed -i "s|\${APP_ID}|${{ inputs.app_id }}|g" {} +
+          find temp_tests -name "*.yaml" -type f -exec sed -i "s|\${env.APP_ID}|${{ inputs.app_id }}|g" {} +
+          find temp_tests -name "*.yaml" -type f -exec sed -i "s|\${APP_ID}|${{ inputs.app_id }}|g" {} +
           
           # Create list of visible files only and copy them
           cd temp_tests
