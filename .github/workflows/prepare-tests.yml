@@ -26,6 +26,11 @@ on:
         required: true
         type: string
         default: 'iPhone 15-17.0'
+      platform:
+        description: 'Platform to test on (ios/android)'
+        required: true
+        type: string
+        default: 'ios'
 
 jobs:
   run-tests:
@@ -179,7 +184,7 @@ jobs:
             --arg app "${{ inputs.bs_app }}" \
             --arg suite "$TEST_SUITE_URL" \
             --argjson devices "$DEVICES_JSON" \
-            --argjson local true \
+            --argjson local "${{ inputs.bs_local }}" \
             '{
               "app": $app,
               "testSuite": $suite,
@@ -187,14 +192,14 @@ jobs:
               "devices": $devices,
               "networkLogs": "true",
               "deviceLogs": "true",
-              "local": "${{ inputs.bs_local }}",
+              "local": $local,
             }')
           
           echo "Request body: $REQUEST_BODY"
           
           RESPONSE=$(curl --fail \
             -u "${BS_USERNAME}:${BS_ACCESS_KEY}" \
-            -X POST "https://api-cloud.browserstack.com/app-automate/maestro/v2/ios/build" \
+            -X POST "https://api-cloud.browserstack.com/app-automate/maestro/v2/${{ inputs.platform }}/build" \
             -H "Content-Type: application/json" \
             -d "$REQUEST_BODY")
           
