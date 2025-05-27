@@ -49,21 +49,19 @@ jobs:
           unzip BrowserStackLocal-linux-x64.zip
           chmod +x BrowserStackLocal
           
-          # Configure based on platform - use local-domains instead of proxy
+          # Set proxy host based on platform
           if [ "${{ inputs.platform }}" = "ios" ]; then
-            # For iOS: redirect specific domains to local mock server
-            ./BrowserStackLocal \
-              --key ${BS_ACCESS_KEY} \
-              --local-domains "api.alfie.com,mock.alfie.local,localhost" \
-              --verbose > bs_local.log 2>&1 &
+            PROXY_HOST="bs-local.com"
           else
-            # For Android: use localhost proxy
-            ./BrowserStackLocal \
-              --key ${BS_ACCESS_KEY} \
-              --local-proxy-host localhost \
-              --local-proxy-port 4000 \
-              --verbose > bs_local.log 2>&1 &
+            PROXY_HOST="localhost"
           fi
+          
+          # Start BrowserStackLocal with proxy settings
+          ./BrowserStackLocal \
+            --key ${BS_ACCESS_KEY} \
+            --local-proxy-host $PROXY_HOST \
+            --local-proxy-port 4000 \
+            --verbose > bs_local.log 2>&1 &
           
           # Store the PID
           echo $! > bs_local.pid
@@ -71,7 +69,7 @@ jobs:
           # Wait for connection to be established
           for i in {1..30}; do
             if grep -q "You can now access your local server(s)" bs_local.log; then
-              echo "BrowserStack Local connected successfully"
+              echo "BrowserStack Local connected successfully with proxy host: $PROXY_HOST"
               echo "local_ready=true" >> $GITHUB_OUTPUT
               exit 0
             fi

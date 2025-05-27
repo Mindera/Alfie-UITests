@@ -158,21 +158,23 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
           
-          # Use ARM64 image for M1/M2 runners
-          echo "y" | sdkmanager "system-images;android-30;google_apis;arm64-v8a"
-          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;arm64-v8a"
+          # Install Android system image (arm64) - API 35
+          sdkmanager "system-images;android-35;google_apis;arm64-v8a"
+          
+          # Create Android AVD (arm64) - API 35
+          echo "no" | avdmanager create avd -n Medium_Phone_API_35 -k "system-images;android-35;google_apis;arm64-v8a"
           
           # Create and configure AVD directory
-          mkdir -p ~/.android/avd/test.avd/
-          echo "hw.cpu.ncore=2" >> ~/.android/avd/test.avd/config.ini
-          echo "hw.ramSize=2048" >> ~/.android/avd/test.avd/config.ini
-          echo "hw.lcd.density=420" >> ~/.android/avd/test.avd/config.ini
-          echo "hw.lcd.height=1920" >> ~/.android/avd/test.avd/config.ini
-          echo "hw.lcd.width=1080" >> ~/.android/avd/test.avd/config.ini
+          mkdir -p ~/.android/avd/Medium_Phone_API_35.avd/
+          echo "hw.cpu.ncore=2" >> ~/.android/avd/Medium_Phone_API_35.avd/config.ini
+          echo "hw.ramSize=2048" >> ~/.android/avd/Medium_Phone_API_35.avd/config.ini
+          echo "hw.lcd.density=420" >> ~/.android/avd/Medium_Phone_API_35.avd/config.ini
+          echo "hw.lcd.height=1920" >> ~/.android/avd/Medium_Phone_API_35.avd/config.ini
+          echo "hw.lcd.width=1080" >> ~/.android/avd/Medium_Phone_API_35.avd/config.ini
           
-          # Start emulator with specific configurations for CI/ARM
+          # Start emulator with updated AVD name
           $ANDROID_HOME/emulator/emulator \
-            -avd test \
+            -avd Medium_Phone_API_35 \
             -no-audio \
             -no-boot-anim \
             -no-window \
@@ -209,7 +211,7 @@ jobs:
             echo "ADB devices output:"
             adb devices
             echo "Emulator log:"
-            cat ~/.android/avd/test.avd/config.ini
+            cat ~/.android/avd/Medium_Phone_API_35.avd/config.ini
             exit 1
           fi
           
