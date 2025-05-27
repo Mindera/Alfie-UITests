@@ -90,7 +90,7 @@ jobs:
           profile: Nexus 6
           script: |
             adb install artifacts/Alfie.apk
-            # Sintaxe correta do Maestro
+            export APP_ID="au.com.alfie.ecomm.debug"
             maestro test tests/ --format junit --output artifacts/android-results.xml --include-tags=${{ github.event.inputs.test_tag }}
 
       # iOS specific setup
@@ -212,4 +212,10 @@ jobs:
             test-artifacts/
             reports/
             ~/.maestro/tests/
-          retention-days: 30 
+          retention-days: 30
+
+      - name: Run iOS tests
+        if: github.event.inputs.platform == 'ios'
+        run: |
+          export APP_ID="com.mindera.alfie.debug"
+          maestro test tests/ --format=junit --output=artifacts/ios-results.xml --include-tags=${{ github.event.inputs.test_tag }} 
