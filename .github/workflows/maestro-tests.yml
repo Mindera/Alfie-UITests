@@ -160,20 +160,15 @@ jobs:
           sdkmanager "system-images;android-31;google_apis;arm64-v8a"
           echo "no" | avdmanager create avd -n Medium_Phone_API_31 -k "system-images;android-31;google_apis;arm64-v8a"
           
-          # List devices like in your workflow
-          echo "=== Emulator List ==="
-          emulator -list-avds
-          echo "=== AVD List ==="
-          avdmanager list avd
-          
-          # Start emulator - simplified version
+          # Start emulator with x86_64
           $ANDROID_HOME/emulator/emulator \
             -avd Medium_Phone_API_31 \
             -no-audio \
             -no-boot-anim \
             -no-window \
             -gpu swiftshader_indirect \
-            -no-snapshot &
+            -no-snapshot \
+            -memory 2048 &
             
           # Wait for device - same logic as your workflow
           echo "Waiting for emulator to start..."
