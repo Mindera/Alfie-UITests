@@ -148,9 +148,17 @@ jobs:
 
       - name: Create zip for BrowserStack
         run: |
-          cd clean_tests
-          zip -r ../browserstack_tests.zip ./*
+          # Create root tests directory and move everything there
+          mkdir -p tests_root/tests
+          cp -r clean_tests/* tests_root/tests/
+          
+          # Create zip from tests folder
+          cd tests_root
+          zip -r ../browserstack_tests.zip tests/*
           cd ..
+          
+          # Cleanup
+          rm -rf tests_root
 
       - name: Upload to BrowserStack
         id: upload_to_browserstack
