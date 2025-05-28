@@ -56,11 +56,12 @@ jobs:
             PROXY_HOST="localhost"
           fi
           
-          # Start BrowserStackLocal with proxy settings
+          # Start BrowserStackLocal with DNS override para aires.com -> localhost:4000
           ./BrowserStackLocal \
             --key ${BS_ACCESS_KEY} \
             --local-proxy-host $PROXY_HOST \
             --local-proxy-port 4000 \
+            --local-dns-override "aires.com:127.0.0.1:4000" \
             --verbose > bs_local.log 2>&1 &
           
           # Store the PID
