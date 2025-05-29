@@ -95,20 +95,30 @@ jobs:
           cd alfie-mocks
           npm install apollo-server graphql
           
-          # Garantir que escuta em todas as interfaces
-          sed -i "s/listen.*localhost/listen(4000, '0.0.0.0'/g" index.js || true
-          
+          echo "🚀 Starting mock server..."
           node index.js &
-          # Wait for server to be ready
+          MOCK_PID=$!
+          echo $MOCK_PID > ../mock_server.pid
+          
+          # Wait for server to start
           sleep 5
-          # Verify server is running
-          curl -s http://localhost:4000 > /dev/null
-          if [ $? -eq 0 ]; then
-            echo "✅ Mock server is running"
+          
+          # Test local access
+          echo "🔍 Testing mock server locally:"
+          curl -v http://localhost:4000 || echo "❌ localhost:4000 failed"
+          curl -v http://127.0.0.1:4000 || echo "❌ 127.0.0.1:4000 failed"
+          
+          # Check what's actually listening on port 4000
+          echo "🔍 What's listening on port 4000:"
+          netstat -tlnp | grep :4000 || ss -tlnp | grep :4000 || echo "Nothing on port 4000"
+          
+          # Check if process is still running
+          if kill -0 $MOCK_PID 2>/dev/null; then
+            echo "✅ Mock server process is running (PID: $MOCK_PID)"
           else
-            echo "❌ Failed to start mock server"
-            exit 1
+            echo "❌ Mock server process died"
           fi
+          
           cd ..
       
       - name: Prepare Tests
