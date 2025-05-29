@@ -55,10 +55,10 @@ jobs:
           
           # Start BrowserStack Local with platform-specific DNS override
           if [ "${{ inputs.platform }}" = "ios" ]; then
-            echo "🍎 Using machine IP for iOS DNS override: $MACHINE_IP"
+            echo "🍎 Using machine IP for iOS with comprehensive DNS override"
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
-              --local-dns-override "aires.com:$MACHINE_IP:4000" \
+              --local-dns-override "localhost:$MACHINE_IP:4000,127.0.0.1:$MACHINE_IP:4000,aires.com:$MACHINE_IP:4000,bs-local.com:$MACHINE_IP:4000,0.0.0.0:$MACHINE_IP:4000" \
               --verbose > bs_local.log 2>&1 &
           else
             echo "🤖 Using localhost for Android DNS override"
