@@ -58,8 +58,6 @@ jobs:
             echo "🍎 iOS: Simple config - bs-local.com automatically routes to local"
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
-              --proxy-host localhost \
-              --proxy-port 4000 \
               --local-dns-override "1b15-89-181-102-175.ngrok-free.app:bs-local.com:4000" \
               --verbose > bs_local.log 2>&1 &
           else
