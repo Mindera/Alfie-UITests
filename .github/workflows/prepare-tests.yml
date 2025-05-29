@@ -61,6 +61,7 @@ jobs:
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
               --force-local \
+              --local-dns-override "aires.com:127.0.0.1:4000" \
               --local-proxy-host $PROXY_HOST \
               --local-proxy-port 4000 \
               --verbose > bs_local.log 2>&1 &
