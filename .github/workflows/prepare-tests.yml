@@ -49,23 +49,20 @@ jobs:
           unzip BrowserStackLocal-linux-x64.zip
           chmod +x BrowserStackLocal
           
-          # Set proxy host based on platform
-          if [ "${{ inputs.platform }}" = "ios" ]; then
-            PROXY_HOST="bs-local.com"
-          else
-            PROXY_HOST="localhost"
-          fi
+          # Get the actual IP of the machine (BrowserStack recommendation for iOS)
+          MACHINE_IP=$(hostname -I | awk '{print $1}')
+          echo "Machine IP: $MACHINE_IP"
           
-          # Start BrowserStack Local with iOS-specific configuration
+          # Start BrowserStack Local with platform-specific DNS override
           if [ "${{ inputs.platform }}" = "ios" ]; then
+            echo "🍎 Using machine IP for iOS DNS override: $MACHINE_IP"
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
               --force-local \
-              --local-dns-override "aires.com:0.0.0.0:4000" \
-              --local-proxy-host $PROXY_HOST \
-              --local-proxy-port 4000 \
+              --local-dns-override "aires.com:$MACHINE_IP:4000" \
               --verbose > bs_local.log 2>&1 &
           else
+            echo "🤖 Using localhost for Android DNS override"
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
               --local-dns-override "aires.com:127.0.0.1:4000" \
@@ -78,7 +75,7 @@ jobs:
           # Wait for connection to be established
           for i in {1..30}; do
             if grep -q "You can now access your local server(s)" bs_local.log; then
-              echo "BrowserStack Local connected successfully with proxy host: $PROXY_HOST"
+              echo "✅ BrowserStack Local connected successfully"
               echo "local_ready=true" >> $GITHUB_OUTPUT
               exit 0
             fi
@@ -86,7 +83,7 @@ jobs:
             sleep 2
           done
           
-          echo "Error: BrowserStack Local failed to connect"
+          echo "❌ BrowserStack Local failed to connect"
           cat bs_local.log
           exit 1
         env:
