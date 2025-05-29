@@ -100,40 +100,16 @@ jobs:
           # Backup original
           cp index.js index.js.backup
           
-          # Create new index.js with proper CORS and host configuration
-          cat > index.js << 'EOF'
-// Importing required dependencies to have an working mock server
-const { ApolloServer } = require('apollo-server');
-
-const typeDefs = require("./definitions");
-const resolvers = require('./resolvers');
-
-// Setting up server with resolvers and CORS for BrowserStack
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  cors: {
-    origin: [
-      "http://localhost:4000",
-      "http://127.0.0.1:4000", 
-      "http://bs-local.com:4000",
-      "https://bs-local.com:4000"
-    ],
-    credentials: true
-  },
-  // Accept any host header
-  introspection: true,
-  playground: true
-});
-
-const port = process.env.PORT || 4000;
-server.listen({ port, host: '0.0.0.0' }).then(({ url }) => {
-  console.log(`🚀 Server ready at ${url}`);
-  console.log(`🌐 Also accessible via bs-local.com:${port}`);
-});
-EOF
+          # Simple approach: modify existing file instead of recreating
+          # Add CORS and host configuration
+          sed -i 's/const server = new ApolloServer({/const server = new ApolloServer({\
+            cors: { origin: ["http:\/\/localhost:4000", "http:\/\/bs-local.com:4000"], credentials: true },/' index.js
           
-          echo "✅ Modified index.js for BrowserStack Local compatibility"
+          # Change listen to bind to all interfaces
+          sed -i 's/server.listen({ port })/server.listen({ port, host: "0.0.0.0" })/' index.js
+          
+          echo "Modified index.js:"
+          cat index.js
           
           node index.js &
           MOCK_PID=$!
@@ -141,7 +117,7 @@ EOF
           
           sleep 5
           
-          # Test local access
+          # Test access
           curl -s http://localhost:4000 && echo "✅ localhost works" || echo "❌ localhost failed"
           curl -s -H "Host: bs-local.com:4000" http://localhost:4000 && echo "✅ bs-local.com header works" || echo "❌ bs-local.com header failed"
           
