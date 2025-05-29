@@ -56,12 +56,12 @@ jobs:
             PROXY_HOST="localhost"
           fi
           
-          # Start BrowserStackLocal with DNS override para aires.com -> localhost:4000
+          # Start BrowserStackLocal with DNS override
           ./BrowserStackLocal \
             --key ${BS_ACCESS_KEY} \
             --local-proxy-host $PROXY_HOST \
             --local-proxy-port 4000 \
-            --local-dns-override "aires.com:127.0.0.1:4000" \
+            --local-dns-override "aires.com:api.localhost:4000" \
             --verbose > bs_local.log 2>&1 &
           
           # Store the PID
@@ -94,7 +94,10 @@ jobs:
         run: |
           cd alfie-mocks
           npm install apollo-server graphql
-          # Start the mock server in background
+          
+          # Garantir que escuta em todas as interfaces
+          sed -i "s/listen.*localhost/listen(4000, '0.0.0.0'/g" index.js || true
+          
           node index.js &
           # Wait for server to be ready
           sleep 5

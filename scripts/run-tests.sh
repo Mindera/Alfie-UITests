@@ -55,30 +55,41 @@ check_android_device() {
     device_id=$(adb devices | grep -v "List" | grep "device$" | head -n 1 | cut -f1)
     
     if [ -z "$device_id" ]; then
-        echo "No emulator running. Creating and starting a new one..."
+        echo "No emulator running. Trying to start an existing emulator..."
         
-        # Check if AVD exists
-        if ! avdmanager list avd | grep -q "test_device"; then
-            echo "Creating new emulator..."
-            echo "y" | sdkmanager "system-images;android-31;google_apis;arm64-v8a"
-            echo "no" | avdmanager create avd -n test_device -k "system-images;android-31;google_apis;arm64-v8a"
+        # Set correct Android SDK path for macOS
+        if [ -z "$ANDROID_HOME" ]; then
+            if [ -d "$HOME/Library/Android/sdk" ]; then
+                export ANDROID_HOME="$HOME/Library/Android/sdk"
+            elif [ -d "$HOME/android-sdk" ]; then
+                export ANDROID_HOME="$HOME/android-sdk"
+            else
+                echo "❌ ANDROID_HOME not found. Please set it manually."
+                exit 1
+            fi
         fi
         
-        # Start emulator with ARM configuration
-        echo "Starting emulator..."
-        $ANDROID_HOME/emulator/emulator \
-            -avd test_device \
-            -no-audio \
-            -no-boot-anim \
-            -no-window \
-            -gpu swiftshader_indirect \
-            -accel off &
+        # List available AVDs
+        echo "Available AVDs:"
+        "$ANDROID_HOME/emulator/emulator" -list-avds
         
-        # Wait for device with increased timeout
-        adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+        # Try to use the first available AVD (filtering out INFO/ERROR lines)
+        FIRST_AVD=$("$ANDROID_HOME/emulator/emulator" -list-avds 2>/dev/null | grep -v "INFO\|ERROR\|WARNING" | head -n 1)
         
-        device_id=$(adb devices | grep -v "List" | grep "device$" | head -n 1 | cut -f1)
-        echo "✅ Emulator ready: $device_id"
+        if [ -n "$FIRST_AVD" ]; then
+            echo "Starting emulator: $FIRST_AVD"
+            "$ANDROID_HOME/emulator/emulator" -avd "$FIRST_AVD" -no-audio -no-boot-anim -no-window &
+            
+            # Wait for device to be ready
+            echo "Waiting for emulator to boot..."
+            adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+            
+            device_id=$(adb devices | grep -v "List" | grep "device$" | head -n 1 | cut -f1)
+            echo "✅ Emulator ready: $device_id"
+        else
+            echo "❌ No AVDs found. Please create one using Android Studio first."
+            exit 1
+        fi
     else
         echo "✅ Found Android device: $device_id"
     fi
@@ -120,7 +131,7 @@ if [ "$platform" = "ios" ]; then
     fi
     
     # Check if app is already installed
-    if ! xcrun simctl list apps | grep -q "$APP_ID"; then
+    if ! xcrun simctl listapps booted | grep -q "$APP_ID"; then
         echo "📱 App not installed. Installing iOS app..."
         xcrun simctl install booted "$APP_PATH"
         if [ $? -eq 0 ]; then
@@ -174,5 +185,6 @@ echo "🆔 App ID: $APP_ID"
 timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
 report_file="reports/${timestamp}-report.html"
 
-# Run tests with explicit output path
-maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file"
+# Export APP_ID and run tests
+export APP_ID="$APP_ID"
+maestro test --env APP_ID="$APP_ID" --include-tags="$tag" tests/ --format=html --output="$report_file" --debug-output reports/
