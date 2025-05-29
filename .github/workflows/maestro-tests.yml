@@ -175,7 +175,7 @@ jobs:
         if: github.event.inputs.platform == 'ios'
         run: |
           export APP_ID="com.mindera.alfie.debug"
-          maestro test tests/ --format=junit --output=artifacts/ios-results.xml --include-tags=${{ github.event.inputs.test_tag }} 
+          maestro test tests/ --env APP_ID="com.mindera.alfie.debug" --format=junit --output=artifacts/ios-results.xml --include-tags=${{ github.event.inputs.test_tag }} 
 
       - name: Collect test artifacts
         if: always()
