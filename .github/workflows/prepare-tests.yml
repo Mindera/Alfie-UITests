@@ -58,6 +58,7 @@ jobs:
             echo "🍎 Using machine IP for iOS with comprehensive DNS override"
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
+              --force-local \
               --local-proxy-host bs-local.com \
               --local-proxy-port 4000 \
               --local-dns-override "https://1b15-89-181-102-175.ngrok-free.app:$MACHINE_IP:4000,127.0.0.1:$MACHINE_IP:4000,aires.com:$MACHINE_IP:4000,bs-local.com:$MACHINE_IP:4000,0.0.0.0:$MACHINE_IP:4000" \
@@ -68,7 +69,6 @@ jobs:
               --key ${BS_ACCESS_KEY} \
               --local-proxy-host localhost \
               --local-proxy-port 4000 \
-              --local-dns-override "aires.com:127.0.0.1:4000" \
               --verbose > bs_local.log 2>&1 &
           fi
           
