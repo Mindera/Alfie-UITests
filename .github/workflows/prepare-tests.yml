@@ -53,22 +53,17 @@ jobs:
           MACHINE_IP=$(hostname -I | awk '{print $1}')
           echo "Machine IP: $MACHINE_IP"
           
-          # Start BrowserStack Local with platform-specific DNS override
+          # Start BrowserStack Local - simple config using bs-local.com for iOS
           if [ "${{ inputs.platform }}" = "ios" ]; then
-            echo "🍎 Using machine IP for iOS with comprehensive DNS override"
+            echo "🍎 iOS: Redirecting ngrok to bs-local.com:4000"
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
-              --force-local \
-              --local-proxy-host $MACHINE_IP \
-              --local-proxy-port 4000 \
-              --local-dns-override "1b15-89-181-102-175.ngrok-free.app:$MACHINE_IP:4000,localhost:$MACHINE_IP:4000" \
+              --local-dns-override "1b15-89-181-102-175.ngrok-free.app:bs-local.com:4000" \
               --verbose > bs_local.log 2>&1 &
           else
-            echo "🤖 Using localhost for Android DNS override"
+            echo "🤖 Android: Redirecting ngrok to localhost:4000"
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
-              --local-proxy-host localhost \
-              --local-proxy-port 4000 \
               --verbose > bs_local.log 2>&1 &
           fi
           
