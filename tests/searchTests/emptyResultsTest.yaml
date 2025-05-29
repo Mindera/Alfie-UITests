@@ -13,6 +13,7 @@ tags:
 #- assertVisible: "We were unable to find any results for your search ‘zxcvbnm’"
 
 # The following line should run only if we ARE using Mock Server #
+- waitForAnimationToEnd
 - assertVisible: "Search Suggestions"
 - assertNotVisible:
     id: ${output.plpScreen.productCard}

@@ -6,12 +6,12 @@ appId: ${APP_ID}
     when:
         platform: "Android"
     commands:
-        - runFlow: ../../screens/Android/androidElements.yaml
+        - runFlow: ../../screens/android/androidElements.yaml
 - runFlow:
     when:
         platform: "iOS"
     commands:
-        - runFlow: ../../screens/iOS/iOSElements.yaml
+        - runFlow: ../../screens/ios/iOSElements.yaml
 - launchApp:
     clearState: true
     clearKeychain: true

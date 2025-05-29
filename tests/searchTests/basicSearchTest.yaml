@@ -16,9 +16,13 @@ tags:
     timeout: ${output.elementVisibleTimeout}
 - tapOn: "Shirts Men"
 - extendedWaitUntil:
-    visible: "clarisse button mini"
+    visible: 
+        id: "product-card"
+        index: 0
     timeout: ${output.elementVisibleTimeout}
-- tapOn: "clarisse button mini"
+- tapOn:
+    id: "product-card"
+    index: 0
 - extendedWaitUntil:
     visible: "Add to bag"
     timeout: ${output.elementVisibleTimeout}

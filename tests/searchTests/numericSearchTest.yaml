@@ -12,6 +12,7 @@ tags:
 #- assertVisible: "We were unable to find any results for your search ‘1234567890’" # Verify handling of numeric characters 
 
 # The following line should run only if we ARE using Mock Server #
+- waitForAnimationToEnd
 - assertVisible: "Search Suggestions"  # Verify handling of numeric characters 
 - assertNotVisible:
-    id: ${output.plpScreen.productCard} 
+    id: ${output.plpScreen.productCard}

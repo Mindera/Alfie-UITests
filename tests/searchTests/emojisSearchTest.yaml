@@ -12,5 +12,6 @@ tags:
       - tapOn:
             id: ${output.homeScreen.searchInput}
       - inputText: "😀 🎉 🌟"
+      - waitForAnimationToEnd
       - assertNotVisible:
-            id: ${output.plpScreen.productCard} 
+            id: ${output.plpScreen.productCard}

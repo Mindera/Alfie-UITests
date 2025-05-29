@@ -10,6 +10,7 @@ tags:
 - inputText: "shirts"
 - pressKey: Enter
 - runFlow: ../../generics/actions/backAndTapSearch.yaml
+- waitForAnimationToEnd
 - tapOn: 
     id: ${output.homeScreen.searchInput}
-- assertVisible: "shirts"  # Verify that last search appears in Search history 
+- assertVisible: "shirts"  # Verify that last search appears in Search history
