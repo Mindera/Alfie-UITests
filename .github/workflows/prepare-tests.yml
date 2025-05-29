@@ -58,7 +58,6 @@ jobs:
             echo "🍎 Using machine IP for iOS DNS override: $MACHINE_IP"
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
-              --force-local \
               --local-dns-override "aires.com:$MACHINE_IP:4000" \
               --verbose > bs_local.log 2>&1 &
           else
