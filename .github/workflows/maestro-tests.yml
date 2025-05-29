@@ -21,14 +21,17 @@ on:
 jobs:
   mobile-test:
     name: Run ${{ github.event.inputs.platform }} UI Tests
-    # Use Ubuntu for Android, macOS for iOS (as recommended by the action)
     runs-on: ${{ github.event.inputs.platform == 'android' && 'ubuntu-latest' || 'macos-latest' }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Add Mock Server setup
+      - name: Create required directories
+        run: |
+          mkdir -p artifacts
+          mkdir -p reports
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -58,16 +61,11 @@ jobs:
           fi
           cd ..
 
-      - name: Create artifacts directory
-        run: mkdir -p artifacts
-
-      # Install Maestro CLI
       - name: Install Maestro CLI
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
-      # Android setup using the dedicated action
       - name: Enable KVM group perms
         if: github.event.inputs.platform == 'android'
         run: |
@@ -80,20 +78,6 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.app_url }}" -o artifacts/Alfie.apk
 
-      - name: Run Android tests with emulator
-        if: github.event.inputs.platform == 'android'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 31
-          arch: x86_64
-          target: google_apis
-          profile: Nexus 6
-          script: |
-            adb install artifacts/Alfie.apk
-            export APP_ID="au.com.alfie.ecomm.debug"
-            maestro test tests/ --env APP_ID="au.com.alfie.ecomm.debug" --format junit --output artifacts/android-results.xml --include-tags=${{ github.event.inputs.test_tag }}
-
-      # iOS specific setup
       - name: Setup iOS dependencies
         if: github.event.inputs.platform == 'ios'
         run: |
@@ -101,7 +85,6 @@ jobs:
           sudo xcode-select --switch /Applications/Xcode.app
           xcrun simctl list devices
 
-      # Android specific setup
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -130,11 +113,6 @@ jobs:
             exit 1
           fi
 
-      - name: Create required directories
-        run: |
-          mkdir -p reports
-
-      # Platform specific app download and setup
       - name: Setup iOS app
         if: github.event.inputs.platform == 'ios'
         run: |
@@ -180,16 +158,24 @@ jobs:
             exit 1
           fi
 
-      - name: Give permission to run script
-        run: chmod +x scripts/run-tests.sh
-
-      - name: Run Maestro tests
-        env:
-          MAESTRO_CLI_NO_ANALYTICS: "true"
-          MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: "true"
+      - name: Run Android tests with emulator
+        if: github.event.inputs.platform == 'android'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          arch: x86_64
+          target: google_apis
+          profile: Nexus 6
+          script: |
+            adb install artifacts/Alfie.apk
+            export APP_ID="au.com.alfie.ecomm.debug"
+            maestro test tests/ --env APP_ID="au.com.alfie.ecomm.debug" --format junit --output artifacts/android-results.xml --include-tags=${{ github.event.inputs.test_tag }}
+      
+      - name: Run iOS tests
+        if: github.event.inputs.platform == 'ios'
         run: |
-          mkdir -p reports
-          ./scripts/run-tests.sh ${{ github.event.inputs.platform }} ${{ github.event.inputs.test_tag }}
+          export APP_ID="com.mindera.alfie.debug"
+          maestro test tests/ --format=junit --output=artifacts/ios-results.xml --include-tags=${{ github.event.inputs.test_tag }} 
 
       - name: Collect test artifacts
         if: always()
@@ -213,9 +199,3 @@ jobs:
             reports/
             ~/.maestro/tests/
           retention-days: 30
-
-      - name: Run iOS tests
-        if: github.event.inputs.platform == 'ios'
-        run: |
-          export APP_ID="com.mindera.alfie.debug"
-          maestro test tests/ --format=junit --output=artifacts/ios-results.xml --include-tags=${{ github.event.inputs.test_tag }} 
