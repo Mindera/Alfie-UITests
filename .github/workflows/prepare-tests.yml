@@ -56,13 +56,20 @@ jobs:
             PROXY_HOST="localhost"
           fi
           
-          # Start BrowserStackLocal with DNS override
-          ./BrowserStackLocal \
-            --key ${BS_ACCESS_KEY} \
-            --local-proxy-host $PROXY_HOST \
-            --local-proxy-port 4000 \
-            --local-dns-override "aires.com:api.localhost:4000" \
-            --verbose > bs_local.log 2>&1 &
+          # Start BrowserStack Local with iOS-specific configuration
+          if [ "${{ inputs.platform }}" = "ios" ]; then
+            ./BrowserStackLocal \
+              --key ${BS_ACCESS_KEY} \
+              --force-local \
+              --local-proxy-host $PROXY_HOST \
+              --local-proxy-port 4000 \
+              --verbose > bs_local.log 2>&1 &
+          else
+            ./BrowserStackLocal \
+              --key ${BS_ACCESS_KEY} \
+              --local-dns-override "aires.com:127.0.0.1:4000" \
+              --verbose > bs_local.log 2>&1 &
+          fi
           
           # Store the PID
           echo $! > bs_local.pid
