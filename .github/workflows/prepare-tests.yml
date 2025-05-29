@@ -55,9 +55,11 @@ jobs:
           
           # Start BrowserStack Local - simple config using bs-local.com for iOS
           if [ "${{ inputs.platform }}" = "ios" ]; then
-            echo "🍎 iOS: Redirecting ngrok to bs-local.com:4000"
+            echo "🍎 iOS: Using proxy instead of DNS override"
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
+              --proxy-host bs-local.com \
+              --proxy-port 4000 \
               --local-dns-override "1b15-89-181-102-175.ngrok-free.app:bs-local.com:4000" \
               --verbose > bs_local.log 2>&1 &
           else
