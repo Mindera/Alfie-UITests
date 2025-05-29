@@ -95,29 +95,55 @@ jobs:
           cd alfie-mocks
           npm install apollo-server graphql
           
-          echo "🚀 Starting mock server..."
+          echo "🔧 Configuring Apollo Server for bs-local.com..."
+          
+          # Backup original
+          cp index.js index.js.backup
+          
+          # Create new index.js with proper CORS and host configuration
+          cat > index.js << 'EOF'
+// Importing required dependencies to have an working mock server
+const { ApolloServer } = require('apollo-server');
+
+const typeDefs = require("./definitions");
+const resolvers = require('./resolvers');
+
+// Setting up server with resolvers and CORS for BrowserStack
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  cors: {
+    origin: [
+      "http://localhost:4000",
+      "http://127.0.0.1:4000", 
+      "http://bs-local.com:4000",
+      "https://bs-local.com:4000"
+    ],
+    credentials: true
+  },
+  // Accept any host header
+  introspection: true,
+  playground: true
+});
+
+const port = process.env.PORT || 4000;
+server.listen({ port, host: '0.0.0.0' }).then(({ url }) => {
+  console.log(`🚀 Server ready at ${url}`);
+  console.log(`🌐 Also accessible via bs-local.com:${port}`);
+});
+EOF
+          
+          echo "✅ Modified index.js for BrowserStack Local compatibility"
+          
           node index.js &
           MOCK_PID=$!
           echo $MOCK_PID > ../mock_server.pid
           
-          # Wait for server to start
           sleep 5
           
           # Test local access
-          echo "🔍 Testing mock server locally:"
-          curl -v http://localhost:4000 || echo "❌ localhost:4000 failed"
-          curl -v http://127.0.0.1:4000 || echo "❌ 127.0.0.1:4000 failed"
-          
-          # Check what's actually listening on port 4000
-          echo "🔍 What's listening on port 4000:"
-          netstat -tlnp | grep :4000 || ss -tlnp | grep :4000 || echo "Nothing on port 4000"
-          
-          # Check if process is still running
-          if kill -0 $MOCK_PID 2>/dev/null; then
-            echo "✅ Mock server process is running (PID: $MOCK_PID)"
-          else
-            echo "❌ Mock server process died"
-          fi
+          curl -s http://localhost:4000 && echo "✅ localhost works" || echo "❌ localhost failed"
+          curl -s -H "Host: bs-local.com:4000" http://localhost:4000 && echo "✅ bs-local.com header works" || echo "❌ bs-local.com header failed"
           
           cd ..
       
