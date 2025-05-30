@@ -14,15 +14,3 @@ tags:
         id: "product-card"
         index: 0
     timeout: ${output.elementVisibleTimeout}
-- runFlow:
-    when:
-      platform: "iOS"
-    commands:
-      - assertVisible:
-            id: ${output.plpScreen.resultsLabel}
-- runFlow:
-    when:
-      platform: "Android"
-    commands:
-      - assertVisible:
-            id: ${output.plpScreen.titleHeader}

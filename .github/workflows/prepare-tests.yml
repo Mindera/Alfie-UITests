@@ -59,11 +59,15 @@ jobs:
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
               --force-local-proxy \
+              --local-proxy-host $MACHINE_IP \
+              --local-proxy-port 4000 \
               --verbose > bs_local.log 2>&1 &
           else
             echo "🤖 Android: Standard localhost config"
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
+              --local-proxy-host localhost \
+              --local-proxy-port 4000 \
               --verbose > bs_local.log 2>&1 &
           fi
           
