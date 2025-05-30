@@ -59,7 +59,7 @@ jobs:
             ./BrowserStackLocal \
               --key ${BS_ACCESS_KEY} \
               --force-local-proxy \
-              --local-proxy-host $MACHINE_IP \
+              --local-proxy-host bs-local.com \
               --local-proxy-port 4000 \
               --verbose > bs_local.log 2>&1 &
           else
