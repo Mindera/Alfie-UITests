@@ -1,7 +1,7 @@
 // searchScreen.js
 output.searchScreen = {
     textToSearch: 'search-input',
-    backButton: 'Left',
+    backButton: '9%,9%',
     magnifier: 'magnifyingglass',	
     closeButton: 'close-btn',
     recenteSearchTitle: 'recent-search-title',

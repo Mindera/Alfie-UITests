@@ -1,6 +1,6 @@
 // plpScreen.js
 output.plpScreen = {
-    backButton: 'Left',
+    backButton: '9%,9%',
     titleHeader: 'title-header',
     filterButton: 'filter-btn',
     resultsLabel: 'results-lbl',
