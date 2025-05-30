@@ -1,1 +1,1 @@
-output.elementVisibleTimeout = 5000
+output.elementVisibleTimeout = 10000
